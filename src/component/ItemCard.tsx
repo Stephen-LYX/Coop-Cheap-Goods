@@ -1,0 +1,77 @@
+import Image from "next/image"
+import Link from "next/link"
+import { useItemContext } from "../contexts/ItemContext"
+
+const HeartIcon = ({ filled = false }) => (
+  <svg className="w-5 h-5" fill={filled ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+  </svg>
+)
+
+function ItemCard({ item }) {
+  const { isFavorite, addToFavorites, removeFromFavorites } = useItemContext()
+  const favorite = isFavorite(item.id)
+
+  function onFavoriteClick(e) {
+    e.preventDefault()
+    if (favorite) {
+      removeFromFavorites(item.id)
+    } else {
+      addToFavorites(item)
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 group">
+      <Link href={`/item/${item.id}`} className="block">
+        <div className="relative">
+          {/* Item Image */}
+          <div className="aspect-square relative overflow-hidden rounded-t-lg bg-gray-100">
+            <Image
+              src={item.image}
+              alt={item.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-200"
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            />
+            {/* Wishlist Button Overlay */}
+            <div className="absolute inset-0">
+              <button
+                onClick={onFavoriteClick}
+                className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
+                  favorite 
+                    ? 'bg-red-500 text-white' 
+                    : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
+                }`}
+              >
+                <HeartIcon filled={favorite} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Item Details */}
+        <div className="p-4">
+          {/* Item Name */}
+          <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
+            {item.name}
+          </h3>
+          
+          {/* Condition */}
+          <p className="text-xs text-gray-500 mb-2">
+            {item.condition}
+          </p>
+          
+          {/* Price */}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-lg font-bold text-gray-900">
+              ${item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+        </div>
+      </Link>
+    </div>
+  )
+}
+
+export default ItemCard

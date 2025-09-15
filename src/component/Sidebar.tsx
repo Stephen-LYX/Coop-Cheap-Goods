@@ -172,8 +172,6 @@ const Sidebar = () => {
           ))}
         </div>
       </nav>
-
-
     </div>
   )
 }
