@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 
 export default function Home() {
+<<<<<<< Updated upstream
   
     // <main className="p-8">
     //   <h1 className="font-bold text-blue-500 text-2xl">
@@ -13,3 +14,7 @@ export default function Home() {
     redirect("/login");
 }
 
+=======
+  redirect("/login");
+}
+>>>>>>> Stashed changes
