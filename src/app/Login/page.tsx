@@ -1,22 +1,23 @@
-"use client"; //client component
+"use client"; // client component
 
 import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
+import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
 
 export default function LoginPage() {
-  const supabase = createClientComponentClient();
-  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState(""); // for signup
+  const [isSignUp, setIsSignUp] = useState(false); // toggle between login/signup
   const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  //handle login
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email, 
       password,
     });
 
@@ -24,42 +25,91 @@ export default function LoginPage() {
       setMessage("Error: " + error.message);
     } else {
       setMessage("Login successful! Welcome " + data.user.email);
-      router.push("/home"); // redirect after login
+      router.push("/home");
     }
   };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { data, error } = await SupabaseAuthClient.auth.signUp({
+      email, 
+      password,
+    });
+
+    if (error) {
+      setMessage("Error: " + error.message);
+      return;
+    }
+
+    // if signup works, insert username into your "profiles" (or "users") table
+    const { error: insertError } = await supabase
+      .from("profiles") //table name
+      .insert([{id: data.user?.id, email, username}]);
+
+    if(insertError) {
+      setMessage("Signup succeeded, but error saving username: "+ insertError.message);
+    } else {
+        setMessage("Account created! Please check your email to confirm.");
+    };
+  };
+}
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">
-          Login
+          {isSignUp ? "Create Account" : "Login"}
         </h1>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+        <form
+          onSubmit={isSignUp ? handleSignUp : handleLogin}
+          className="flex flex-col gap-4"
+        >
           <input
             type="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
+
+          export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
+          {isSignUp && (
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          )}
           <button
             type="submit"
             className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 transition-colors"
           >
             Log In
+            {isSignUp ? "Sign Up" : "Log In"}
           </button>
         </form>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          {isSignUp ? "Already have an account?" : "Don’t have an account?"}{" "}
+          <button
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setMessage("");
+            }}
+            className="text-blue-600 hover:underline"
+          >
+            {isSignUp ? "Log In" : "Sign Up"}
+          </button>
+        </p>
+
         {message && (
           <p className="mt-4 text-center text-sm text-red-600">{message}</p>
         )}
       </div>
     </div>
   );
+}
 }
