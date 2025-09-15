@@ -31,12 +31,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <Navbar />
+          {/* <Navbar /> */}
 
           {/* Main layout with sidebar and content */}
           <div className="flex min-h-screen">
             {/* Sidebar - positioned under navbar */}
-            <Sidebar />
+            {/* <Sidebar /> */}
 
             {/* Main content area */}
             <div className="flex-1 flex flex-col">

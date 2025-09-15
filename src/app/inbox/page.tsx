@@ -1,7 +1,9 @@
+"use client"
 import { RealtimeChat } from "@/components/realtime-chat";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { IoIosSearch } from "react-icons/io";
+import Navbar from "@/component/Navbar";
 
 export default function liveChat() {
     const [username, setUsername] = useState("");
@@ -9,11 +11,12 @@ export default function liveChat() {
 
         <div className="h-screen w-screen">
             {/* HEADER */}
-            <header className="h-1/12">HEADER</header>
+            {/* <header className="h-1/12">HEADER</header> */}
+            <Navbar />
 
             <div className="flex h-11/12">
                 {/* side panel that shows user chats */}
-                <div className="border border-solid w-3/12 m-0 bg-[#FFFBDE]">
+                <div className="border border-solid w-2/12 m-0 bg-[#FFFBDE]">
 
                     <div className="font-bold text-3xl h-1/12 pt-3 px-3">Inbox</div>
 

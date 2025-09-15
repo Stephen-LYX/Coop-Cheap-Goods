@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 
 
 export default function Home() {
-<<<<<<< Updated upstream
-  
+
     // <main className="p-8">
     //   <h1 className="font-bold text-blue-500 text-2xl">
     //     Marketplace
@@ -13,8 +12,3 @@ export default function Home() {
     // </main>
     redirect("/login");
 }
-
-=======
-  redirect("/login");
-}
->>>>>>> Stashed changes

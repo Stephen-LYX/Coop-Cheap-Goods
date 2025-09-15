@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/supabase/utils'
 import { ChatMessageItem } from '@/components/chat-message'
 import { useChatScroll } from '@/hooks/use-chat-scroll'
 import {

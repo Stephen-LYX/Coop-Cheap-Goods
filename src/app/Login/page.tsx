@@ -3,37 +3,57 @@
 import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
+import { useRouter } from "next/navigation";
+
 
 export default function LoginPage() {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState(""); // for signup
   const [isSignUp, setIsSignUp] = useState(false); // toggle between login/signup
   const [message, setMessage] = useState("");
 
-<<<<<<< Updated upstream
-  //handle login
-=======
   // handle login
-  // const handleLogin = async (e: React.FormEvent) => {
-  //   e.preventDefault();
+  const handleLogin = async (e: React.FormEvent) => {
+    const supabase = createClientComponentClient(); // ✅ initialize client
+    const router = useRouter();
+    e.preventDefault();
 
-  //   const { data, error } = await supabase.auth.signInWithPassword({
-  //     email,
-  //     password,
-  //   });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  //   if (error) {
-  //     setMessage("Error: " + error.message);
-  //   } else {
-  //     setMessage("Login successful! Welcome " + data.user.email);
-  //     router.push("/home");
-  //   }
-  // };
+    if (error) {
+      setMessage("Error: " + error.message);
+      return;
+    }
 
-  // // handle signup
+    const user = data.user;
+
+    // Fetch username from your profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError) {
+      setMessage(
+        "Login succeeded, but error fetching profile: " + profileError.message
+      );
+    } else {
+      setMessage(`Login successful! Welcome ${profile.username}`);
+      // You may want to save this username globally (context, zustand, recoil, etc.)
+    }
+
+    router.push("/chat");
+  };
+
+  // handle signup
   const handleSignUp = async (e: React.FormEvent) => {
+    const supabase = createClientComponentClient();
+    
     e.preventDefault();
 
     const { data, error } = await supabase.auth.signUp({
@@ -48,7 +68,7 @@ export default function LoginPage() {
 
     // if signup works, insert username into your "profiles" (or "users") table
     const { error: insertError } = await supabase
-      .from("profiles") // change this to your actual table name
+      .from("profiles") // table name
       .insert([{ id: data.user?.id, email, username }]);
 
     if (insertError) {
@@ -57,74 +77,6 @@ export default function LoginPage() {
       setMessage("Account created! Please check your email to confirm.");
     }
   };
-// handle login
-
-//delete the row below 
->>>>>>> Stashed changes
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email, 
-      password,
-    });
-
-    if (error) {
-      setMessage("Error: " + error.message);
-<<<<<<< Updated upstream
-    } else {
-      setMessage("Login successful! Welcome " + data.user.email);
-      router.push("/home");
-=======
-      return;
->>>>>>> Stashed changes
-    }
-
-    const user = data.user;
-
-    // Fetch username from your profiles table
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError) {
-      setMessage("Login succeeded, but error fetching profile: " + profileError.message);
-    } else {
-      setMessage(`Login successful! Welcome ${profile.username}`);
-      // You may want to save this username globally (context, zustand, recoil, etc.)
-    }
-
-    router.push("/chat");
-  };
-// delete the row above
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const { data, error } = await SupabaseAuthClient.auth.signUp({
-      email, 
-      password,
-    });
-
-    if (error) {
-      setMessage("Error: " + error.message);
-      return;
-    }
-
-    // if signup works, insert username into your "profiles" (or "users") table
-    const { error: insertError } = await supabase
-      .from("profiles") //table name
-      .insert([{id: data.user?.id, email, username}]);
-
-    if(insertError) {
-      setMessage("Signup succeeded, but error saving username: "+ insertError.message);
-    } else {
-        setMessage("Account created! Please check your email to confirm.");
-    };
-  };
-}
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -140,8 +92,14 @@ export default function LoginPage() {
           <input
             type="email"
             placeholder="Email"
-
-          export default function LoginPage() {
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
@@ -158,10 +116,6 @@ export default function LoginPage() {
             type="submit"
             className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 transition-colors"
           >
-<<<<<<< Updated upstream
-            Log In
-=======
->>>>>>> Stashed changes
             {isSignUp ? "Sign Up" : "Log In"}
           </button>
         </form>
@@ -185,8 +139,23 @@ export default function LoginPage() {
       </div>
     </div>
   );
-<<<<<<< Updated upstream
 }
-=======
->>>>>>> Stashed changes
-}
+
+
+
+  {/* // handle login
+  // const handleLogin = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const { data, error } = await supabase.auth.signInWithPassword({
+  //     email,
+  //     password,
+  //   });
+
+  //   if (error) {
+  //     setMessage("Error: " + error.message);
+  //   } else {
+  //     setMessage("Login successful! Welcome " + data.user.email);
+  //     router.push("/home");
+  //   }
+  // }; */}
