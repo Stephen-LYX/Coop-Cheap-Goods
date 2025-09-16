@@ -3,6 +3,17 @@
 import ItemCard from "./ItemCard"
 import { useItemContext } from "../contexts/ItemContext"
 
+// Define the Item type - adjust properties based on your actual item structure
+interface Item {
+  id: string | number;
+  // Add other properties that your items have, for example:
+  // title: string;
+  // price: number;
+  // image: string;
+  // description: string;
+  // Add any other properties your items contain
+}
+
 const FavoritesGrid = () => {
   const { favorites } = useItemContext()
 
@@ -53,7 +64,7 @@ const FavoritesGrid = () => {
 
       {/* Items Grid - same as MarketplaceGrid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-        {favorites.map((item) => (
+        {favorites.map((item: Item) => (
           <ItemCard key={item.id} item={item} />
         ))}
       </div>
