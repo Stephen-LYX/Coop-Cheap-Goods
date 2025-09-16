@@ -56,12 +56,6 @@ const ChevronRightIcon = () => (
 // Sidebar navigation links
 const SIDEBAR_LINKS = [
   {
-    key: 'dashboard',
-    label: 'Dashboard',
-    href: '/dashboard',
-    icon: 'home'
-  },
-  {
     key: 'products',
     label: 'Products',
     href: '/products',
@@ -86,12 +80,6 @@ const SIDEBAR_LINKS = [
     href: '/analytics',
     icon: 'analytics'
   },
-  {
-    key: 'settings',
-    label: 'Settings',
-    href: '/settings',
-    icon: 'settings'
-  }
 ]
 
 const getIcon = (iconName) => {

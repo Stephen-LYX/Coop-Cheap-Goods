@@ -4,7 +4,7 @@ export const NAV_LINKS = [
   { href: '/Favorites', key: 'favorites', label: 'Favorites'},
   { href: '/inbox', key: 'inbox', label: 'Inbox'},
   { href: '/notifications', key: 'notifications', label: 'Notifications' },
-  { href: '/profile', key: 'profile', label: 'Profile'},
+  { href: '/Profile', key: 'profile', label: 'Profile'},
 ];
 
 // MARKETPLACE ITEMS

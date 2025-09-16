@@ -49,6 +49,115 @@ const MenuIcon = () => (
   </svg>
 )
 
+// Sample notifications data - replace with your actual data
+const sampleNotifications = [
+  {
+    id: 1,
+    title: "New message from John",
+    message: "Hey! Just wanted to check in...",
+    time: "2 min ago",
+    unread: true,
+    avatar: "/api/placeholder/32/32"
+  },
+  {
+    id: 2,
+    title: "Order shipped",
+    message: "Your order #12345 has been shipped",
+    time: "1 hour ago",
+    unread: true,
+    avatar: "/api/placeholder/32/32"
+  },
+  {
+    id: 3,
+    title: "Weekly report ready",
+    message: "Your analytics report is ready to view",
+    time: "3 hours ago",
+    unread: false,
+    avatar: "/api/placeholder/32/32"
+  },
+  {
+    id: 4,
+    title: "System update",
+    message: "New features have been added",
+    time: "1 day ago",
+    unread: false,
+    avatar: "/api/placeholder/32/32"
+  }
+]
+
+const NotificationsDropdown = ({ notifications }) => {
+  return (
+    <div className="absolute right-0 mt-1 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+          <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            Mark all read
+          </button>
+        </div>
+      </div>
+
+      {/* Notifications List */}
+      <div className="max-h-96 overflow-y-auto">
+        {notifications.length === 0 ? (
+          <div className="px-4 py-8 text-center text-gray-500">
+            <BellIcon />
+            <p className="mt-2">No notifications yet</p>
+          </div>
+        ) : (
+          notifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={`px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors duration-150 ${
+                notification.unread ? 'bg-blue-50' : ''
+              }`}
+            >
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <BellIcon />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className={`text-sm font-medium text-gray-900 truncate ${
+                      notification.unread ? 'font-semibold' : ''
+                    }`}>
+                      {notification.title}
+                    </p>
+                    {notification.unread && (
+                      <span className="ml-2 w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 truncate">
+                    {notification.message}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {notification.time}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Footer */}
+      {notifications.length > 0 && (
+        <div className="px-4 py-3 border-t border-gray-200">
+          <Link
+            href="/notifications"
+            className="block text-center text-sm text-blue-600 hover:text-blue-800 font-medium"
+          >
+            View all notifications
+          </Link>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const getIcon = (iconName) => {
   const icons = {
     heart: <HeartIcon />,
@@ -63,6 +172,23 @@ const getIcon = (iconName) => {
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [notificationTimeout, setNotificationTimeout] = useState(null)
+
+  const handleNotificationHover = () => {
+    if (notificationTimeout) {
+      clearTimeout(notificationTimeout)
+      setNotificationTimeout(null)
+    }
+    setShowNotifications(true)
+  }
+
+  const handleNotificationLeave = () => {
+    const timeout = setTimeout(() => {
+      setShowNotifications(false)
+    }, 150) // Small delay to allow mouse movement to dropdown
+    setNotificationTimeout(timeout)
+  }
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
@@ -104,30 +230,65 @@ const Navbar = () => {
 
           {/* Navigation Links - Desktop */}
           <div className="hidden lg:flex items-center space-x-1">
-            {NAV_LINKS.map((link) => (
-              <Link 
-                key={link.key} 
-                href={link.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  link.type === 'button' 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                } flex items-center space-x-1`}
-              >
-                {link.icon && getIcon(link.icon)}
-                <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
-                  {link.label}
-                </span>
-                {link.key === 'cart' && (
-                  <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-1">
-                    3
+            {NAV_LINKS.map((link) => {
+              // Special handling for notifications
+              if (link.key === 'notifications') {
+                return (
+                  <div 
+                    key={link.key}
+                    className="relative"
+                  >
+                    <div
+                      onMouseEnter={handleNotificationHover}
+                      onMouseLeave={handleNotificationLeave}
+                    >
+                      <Link 
+                        href={link.href}
+                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                          link.type === 'button' 
+                            ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                        } flex items-center space-x-1`}
+                      >
+                        {link.icon && getIcon(link.icon)}
+                        <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
+                          {link.label}
+                        </span>
+                        <span className="bg-red-500 text-white text-xs rounded-full h-2 w-2 ml-1"></span>
+                      </Link>
+                      
+                      {/* Notifications Dropdown */}
+                      {showNotifications && (
+                        <NotificationsDropdown notifications={sampleNotifications} />
+                      )}
+                    </div>
+                  </div>
+                )
+              }
+
+              // Regular links
+              return (
+                <Link 
+                  key={link.key} 
+                  href={link.href}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    link.type === 'button' 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                  } flex items-center space-x-1`}
+                >
+                  {link.icon && getIcon(link.icon)}
+                  <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
+                    {link.label}
                   </span>
-                )}
-                {link.key === 'notifications' && (
-                  <span className="bg-red-500 text-white text-xs rounded-full h-2 w-2 ml-1"></span>
-                )}
-              </Link>
-            ))}
+                  {link.key === 'cart' && (
+                    <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-1">
+                      3
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -135,4 +296,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
+export default Navbar 
