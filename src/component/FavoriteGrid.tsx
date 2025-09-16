@@ -1,18 +1,19 @@
 "use client"
 
-import ItemCard from "./ItemCard"
+import ItemCard, { Item } from "./ItemCard"
 import { useItemContext } from "../contexts/ItemContext"
 
-// Define the Item type - adjust properties based on your actual item structure
-interface Item {
-  id: string | number;
-  // Add other properties that your items have, for example:
-  // title: string;
-  // price: number;
-  // image: string;
-  // description: string;
-  // Add any other properties your items contain
-}
+
+// // Define the Item type - adjust properties based on your actual item structure
+// interface Item {
+//   id: string | number;
+//   // Add other properties that your items have, for example:
+//   // title: string;
+//   // price: number;
+//   // image: string;
+//   // description: string;
+//   // Add any other properties your items contain
+// }
 
 const FavoritesGrid = () => {
   const { favorites } = useItemContext()

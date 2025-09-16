@@ -8,11 +8,23 @@ const HeartIcon = ({ filled = false }) => (
   </svg>
 )
 
-function ItemCard({ item }) {
+export interface Item {
+  id: number | string
+  name: string
+  image: string
+  condition: string
+  price: number
+}
+
+interface ItemCardProperty {
+  item: Item
+}
+
+function ItemCard({ item }: ItemCardProperty) {
   const { isFavorite, addToFavorites, removeFromFavorites } = useItemContext()
   const favorite = isFavorite(item.id)
 
-  function onFavoriteClick(e) {
+  function onFavoriteClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault()
     if (favorite) {
       removeFromFavorites(item.id)

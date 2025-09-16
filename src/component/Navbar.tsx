@@ -48,8 +48,9 @@ const ShoppingCartIcon = () => (
 //     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
 //   </svg>
 // )
+type IconName = "heart" | "mail" | "bell" | "user" | "shopping-cart"
 
-const getIcon = (iconName) => {
+const getIcon = (iconName: IconName) => {
   const icons = {
     heart: <HeartIcon />,
     mail: <MailIcon />,
