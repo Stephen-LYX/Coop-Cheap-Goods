@@ -24,7 +24,7 @@ export default function LoginPage() {
       setMessage("Error: " + error.message);
     } else {
       setMessage("Login successful! Welcome " + data.user.email);
-      router.push("/home"); // redirect after login
+      router.push("/Home"); // redirect after login
     }
   };
 
