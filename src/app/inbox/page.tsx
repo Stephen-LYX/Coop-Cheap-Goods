@@ -16,12 +16,12 @@ export default function liveChat() {
 
             <div className="flex h-11/12">
                 {/* side panel that shows user chats */}
-                <div className="border border-solid w-2/12 m-0 bg-[#FFFBDE]">
+                <div className="w-2/12 m-0 bg-[#FFFBDE]">
 
                     <div className="font-bold text-3xl h-1/12 pt-3 px-3">Inbox</div>
 
                     {/* Profile search */}
-                    <div className="flex border rounded justify-center items-center m-3 p-1 bg-[#FFFFFF]">
+                    <div className="flex rounded justify-center items-center m-3 p-1 bg-[#FFFFFF]">
                         <IoIosSearch/>
                         <input 
                             className="w-full focus:outline-none focus:border-none" 
@@ -31,20 +31,39 @@ export default function liveChat() {
                     </div>
                     
                     {/* going to contain different chats */}
-                    <div className="w-full h-9.5/12 p-3">chat profiles</div>
+                    <div className="w-full h-[80%] p-3 [&>div]:h-12 [&>div]:text-lg [&>div]:mb-2 [&>div]:text-center">
+                        <div className="flex">
+                            <img
+                                src="/images/example.jpg" 
+                                alt="" 
+                                className="w-2/12 h-auto rounded-lg shadow-md"
+                            />
+                            <div>
+                                <div>Username</div>
+                                <div>comments</div>
+                            </div>
+                        </div>
+                        <div>User 2</div>
+                        <div>User 3</div>
+                        <div>User 4</div>
+                        <div>User 5</div>
+                        <div>User 6</div>
+                    </div>
 
                 </div>
 
                 <div className="w-10/12 m-0">
                     {/* <div className="border rounded h-1/12">Username</div> */}
-                    <Input 
-                        className="w-12/12 h-1/12 focus:outline-none focus:border-none"
-                        placeholder="Enter username"
-                        value = {username}
-                        onChange = {(e) => setUsername(e.target.value)}
+                    
+                    <input 
+                        className="w-12/12 h-1/12 focus:outline-none focus:border-none p-4" 
+                        type="text" 
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Enter Username"
                     />
 
-                    <div className="border-t border-l border-gray-200  h-11/12 p-2">
+                    <div className=" border-gray-200  h-11/12 p-2">
                         <RealtimeChat roomName="my-chat-room" username={username} />
                         
                     </div>
