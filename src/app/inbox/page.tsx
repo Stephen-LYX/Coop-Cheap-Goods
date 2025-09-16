@@ -218,7 +218,7 @@ interface ChatItem {
     alt: string;
 }
 
-export default function liveChat() {
+export default function LiveChat() {
     const [username, setUsername] = useState<string>("");
     const [selectedUser, setSelectedUser] = useState<ChatItem | null>(null);
     const router = useRouter();
