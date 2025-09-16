@@ -10,5 +10,5 @@ export default function Home() {
     //   </h1>
     //   <MarketplaceGrid />
     // </main>
-    redirect("/login");
+    redirect("/Login");
 }
