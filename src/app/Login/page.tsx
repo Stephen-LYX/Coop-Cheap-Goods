@@ -151,7 +151,7 @@ export default function LoginPage() {
         <div className="mt-4 text-center">
           <button
             onClick={toggleMode}
-            className="text-blue-600 hover:text-blue-700 text-sm underline"
+            className="text-blue-600 hover:text-blue-700 text-sm underline cursor-pointer"
           >
             {isSignUp 
               ? "Already have an account? Log in" 
