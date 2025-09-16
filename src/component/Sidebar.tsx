@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
+import type { ReactElement } from "react"
 
 // Icon components matching your navbar style
 const HomeIcon = () => (
@@ -53,8 +54,20 @@ const ChevronRightIcon = () => (
   </svg>
 )
 
+// Define the icon type
+type IconName = 'home' | 'products' | 'categories' | 'orders' | 'analytics' | 'settings';
+
+// Define the sidebar link interface
+interface SidebarLink {
+  key: string;
+  label: string;
+  href: string;
+  icon: IconName;
+  badge?: string;
+}
+
 // Sidebar navigation links
-const SIDEBAR_LINKS = [
+const SIDEBAR_LINKS: SidebarLink[] = [
   {
     key: 'dashboard',
     label: 'Dashboard',
@@ -94,8 +107,9 @@ const SIDEBAR_LINKS = [
   }
 ]
 
-const getIcon = (iconName) => {
-  const icons = {
+// Type the getIcon function properly
+const getIcon = (iconName: IconName): ReactElement | null => {
+  const icons: Record<IconName, ReactElement> = {
     home: <HomeIcon />,
     products: <ProductsIcon />,
     categories: <CategoriesIcon />,
@@ -107,7 +121,7 @@ const getIcon = (iconName) => {
 }
 
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
 
   return (
     <div className={`bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ${
