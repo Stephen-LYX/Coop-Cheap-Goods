@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "../component/Navbar";
 import Sidebar from "../component/Sidebar";
 import Providers from "../providers/Providers";
+import { SearchProvider } from "../contexts/SearchContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,22 +31,24 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          {/* <Navbar /> */}
+        <SearchProvider>
+          <Providers>
+            {/* <Navbar /> */}
 
-          {/* Main layout with sidebar and content */}
-          <div className="flex min-h-screen">
-            {/* Sidebar - positioned under navbar */}
-            {/* <Sidebar /> */}
+            {/* Main layout with sidebar and content */}
+            <div className="flex min-h-screen">
+              {/* Sidebar - positioned under navbar */}
+              {/* <Sidebar /> */}
 
-            {/* Main content area */}
-            <div className="flex-1 flex flex-col">
-              <main className="relative overflow-hidden">
-                {children}
-              </main>
+              {/* Main content area */}
+              <div className="flex-1 flex flex-col">
+                <main className="relative overflow-hidden">
+                  {children}
+                </main>
+              </div>
             </div>
-          </div>
-        </Providers>
+          </Providers>
+        </SearchProvider>
       </body>
     </html>
   );

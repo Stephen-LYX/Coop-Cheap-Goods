@@ -1,29 +1,19 @@
 // NAVIGATION - Updated for eBay-style navbar
-type IconName = "heart" | "mail" | "bell" | "user" | "shopping-cart";
-type NavLink = {
-  href: string;
-  key: string;
-  label: string;
-  type: 'link' | 'button' | 'icon';
-  icon: IconName;
-};
-
-export const NAV_LINKS: NavLink[] = [
-  { href: '/sell', key: 'sell', label: 'Sell', type: 'button', icon: 'shopping-cart' },
-  { href: '/favorites', key: 'favorites', label: 'Favorites', type: 'link', icon: 'heart' },
-  { href: '/inbox', key: 'inbox', label: 'Inbox', type: 'link', icon: 'mail' },
-  { href: '/notifications', key: 'notifications', label: 'Notifications', type: 'link', icon: 'bell' },
-  { href: '/profile', key: 'profile', label: 'Profile', type: 'link', icon: 'user' },
+export const NAV_LINKS = [
+  { href: '/Sell', key: 'sell', label: 'Sell'},
+  { href: '/Favorites', key: 'favorites', label: 'Favorites'},
+  { href: '/Inbox', key: 'inbox', label: 'Inbox'},
+  { href: '/Notifications', key: 'notifications', label: 'Notifications' },
+  { href: '/Profile', key: 'profile', label: 'Profile'},
 ];
-
 
 // MARKETPLACE ITEMS
 export const SAMPLE_ITEMS = [
   {
     id: 1,
     name: "Vintage Camera Canon AE-1",
-    price: 299.99,
-    image: "/api/placeholder/300/300",
+    price: 99.00,
+    image: "/camera.webp",
     location: "New York, NY",
     shipping: "Free shipping",
     condition: "Used - Excellent"
@@ -31,8 +21,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 2,
     name: "MacBook Pro 13-inch M2 2022",
-    price: 1299.00,
-    image: "/api/placeholder/300/300",
+    price: 400.00,
+    image: "/macbook.webp",
     location: "San Francisco, CA",
     shipping: "$15.99 shipping",
     condition: "Used - Very Good"
@@ -40,8 +30,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 3,
     name: "Nike Air Jordan 1 Retro High",
-    price: 180.50,
-    image: "/api/placeholder/300/300",
+    price: 50.50,
+    image: "/airjordan.webp",
     location: "Chicago, IL",
     shipping: "Free shipping",
     condition: "New with box"
@@ -49,8 +39,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 4,
     name: "Wooden Coffee Table Handmade",
-    price: 450.00,
-    image: "/api/placeholder/300/300",
+    price: 100.00,
+    image: "/woodentable.webp",
     location: "Austin, TX",
     shipping: "Local pickup only",
     condition: "New"
@@ -58,8 +48,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 5,
     name: "iPhone 14 Pro Max 256GB",
-    price: 899.99,
-    image: "/api/placeholder/300/300",
+    price: 200.00,
+    image: "/iphone14.webp",
     location: "Los Angeles, CA",
     shipping: "Free shipping",
     condition: "Used - Good"
@@ -67,17 +57,17 @@ export const SAMPLE_ITEMS = [
   {
     id: 6,
     name: "Acoustic Guitar Yamaha FG830",
-    price: 199.99,
-    image: "/api/placeholder/300/300",
+    price: 100.00,
+    image: "/guitar.webp",
     location: "Nashville, TN",
     shipping: "$25.00 shipping",
     condition: "Used - Very Good"
   },
   {
     id: 7,
-    name: "Gaming Chair RGB LED",
-    price: 249.99,
-    image: "/api/placeholder/300/300",
+    name: "Gaming Chair",
+    price: 42.99,
+    image: "/gamingchair.webp",
     location: "Seattle, WA",
     shipping: "Free shipping",
     condition: "New"
@@ -85,8 +75,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 8,
     name: "Vintage Vinyl Record Collection",
-    price: 75.00,
-    image: "/api/placeholder/300/300",
+    price: 30.00,
+    image: "/vinylrecords.webp",
     location: "Detroit, MI",
     shipping: "$12.99 shipping",
     condition: "Used - Good"
@@ -94,8 +84,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 9,
     name: "Mountain Bike Trek X-Caliber",
-    price: 650.00,
-    image: "/api/placeholder/300/300",
+    price: 150.00,
+    image: "/bike.webp",
     location: "Denver, CO",
     shipping: "Local pickup only",
     condition: "Used - Excellent"
@@ -103,8 +93,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 10,
     name: "KitchenAid Stand Mixer",
-    price: 199.95,
-    image: "/api/placeholder/300/300",
+    price: 30.00,
+    image: "/kitchenaid.webp",
     location: "Boston, MA",
     shipping: "Free shipping",
     condition: "Used - Very Good"
@@ -112,8 +102,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 11,
     name: "PlayStation 5 Console",
-    price: 499.99,
-    image: "/api/placeholder/300/300",
+    price: 199.99,
+    image: "/ps5.webp",
     location: "Miami, FL",
     shipping: "$19.99 shipping",
     condition: "New in box"
@@ -121,8 +111,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 12,
     name: "Designer Handbag Coach",
-    price: 125.00,
-    image: "/api/placeholder/300/300",
+    price: 25.00,
+    image: "/handbag.webp",
     location: "Atlanta, GA",
     shipping: "Free shipping",
     condition: "Used - Good"
