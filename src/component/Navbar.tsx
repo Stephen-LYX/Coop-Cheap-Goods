@@ -240,7 +240,7 @@ const Navbar = () => {
 
           {/* Navigation Links - Desktop */}
           <div className="hidden lg:flex items-center space-x-1">
-            {NAV_LINKS.map((link) => {
+            {NAV_LINKS.filter(link => link.key !== 'cart').map((link) => {
               // Special handling for notifications
               if (link.key === 'notifications') {
                 return (
@@ -276,13 +276,13 @@ const Navbar = () => {
                 )
               }
 
-              // Regular links
+              // Regular links - Make Sell button blue
               return (
                 <Link 
                   key={link.key} 
                   href={link.href}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                    link.type === 'button' 
+                    link.key === 'sell' || link.type === 'button'
                       ? 'bg-blue-600 text-white hover:bg-blue-700' 
                       : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                   } flex items-center space-x-1`}
@@ -291,14 +291,25 @@ const Navbar = () => {
                   <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
                     {link.label}
                   </span>
-                  {link.key === 'cart' && (
-                    <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-1">
-                      3
-                    </span>
-                  )}
                 </Link>
               )
             })}
+            
+            {/* Cart Icon - Now positioned last and styled as blue button */}
+            {NAV_LINKS.find(link => link.key === 'cart') && (
+              <Link 
+                href={NAV_LINKS.find(link => link.key === 'cart').href}
+                className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-blue-600 text-white hover:bg-blue-700 flex items-center space-x-1 relative"
+              >
+                <ShoppingCartIcon />
+                <span className="hidden xl:inline">
+                  {NAV_LINKS.find(link => link.key === 'cart').label}
+                </span>
+                <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-1">
+                  3
+                </span>
+              </Link>
+            )}
           </div>
         </div>
       </div>

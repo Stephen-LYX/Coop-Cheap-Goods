@@ -219,9 +219,6 @@ const ProfilePage = () => {
                       <Edit3 />
                       <span>Edit Profile</span>
                     </button>
-                    <button className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-                      Share
-                    </button>
                   </>
                 )}
               </div>
