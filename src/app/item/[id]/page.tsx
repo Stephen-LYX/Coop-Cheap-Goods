@@ -64,7 +64,7 @@ export default async function Item({
         </h1>
         <p className="text-xl">Size: L</p>
         <a
-          href="http://localhost:3000/inbox"
+          href="http://localhost:3000/Inbox"
           className="block py-2 my-4 border border-neutral-950 text-center w-auto hover:bg-gray-100 rounded"
         >
           Message Seller

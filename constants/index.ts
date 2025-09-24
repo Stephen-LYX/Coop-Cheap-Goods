@@ -9,9 +9,9 @@ type NavLink = {
 };
 
 export const NAV_LINKS: NavLink[] = [
-  { href: '/sell', key: 'sell', label: 'Sell', type: 'button', icon: 'shopping-cart' },
+  { href: '/Sell', key: 'sell', label: 'Sell', type: 'button', icon: 'shopping-cart' },
   { href: '/favorites', key: 'favorites', label: 'Favorites', type: 'link', icon: 'heart' },
-  { href: '/inbox', key: 'inbox', label: 'Inbox', type: 'link', icon: 'mail' },
+  { href: '/Inbox', key: 'inbox', label: 'Inbox', type: 'link', icon: 'mail' },
   { href: '/notifications', key: 'notifications', label: 'Notifications', type: 'link', icon: 'bell' },
   { href: '/profile', key: 'profile', label: 'Profile', type: 'link', icon: 'user' },
 ];

@@ -1,30 +1,28 @@
-"use client"; //client component
+"use client"; // client component
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext"; // Import auth context instead of Supabase
 
 export default function LoginPage() {
-  const supabase = createClientComponentClient();
   const router = useRouter();
+  const { login, signUp } = useAuth(); // Get auth functions from context
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle between login and signup
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
+  const [isSignUp, setIsSignUp] = useState<boolean>(false); // Toggle between login and signup
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // Use login function from AuthContext instead of direct Supabase call
+    const { data, error } = await login(email, password);
 
     if (error) {
       setMessage("Error: " + error.message);
@@ -35,7 +33,7 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
@@ -54,15 +52,8 @@ export default function LoginPage() {
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: username, // Store username in user metadata
-        },
-      },
-    });
+    // Use signUp function from AuthContext instead of direct Supabase call
+    const { data, error } = await signUp(email, password, username);
 
     if (error) {
       setMessage("Error: " + error.message);

@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import ItemCard from "./ItemCard" // Import your new ItemCard component
-import { SAMPLE_ITEMS } from "../../constants" // Import sample items from constants
+import ItemCard from "./ItemCard" // Import your ItemCard component
+import { SAMPLE_ITEMS } from "../../constants" // Import sample items
 
 const MarketplaceGrid = () => {
   const [sortBy, setSortBy] = useState('newest')
@@ -10,13 +10,12 @@ const MarketplaceGrid = () => {
   return (
     <div className="p-6">
       {/* Header */}
-      
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Browse Items</h1>
           <p className="text-gray-600 mt-1">{SAMPLE_ITEMS.length} items available</p>
         </div>
-        
+
         {/* Sort Dropdown */}
         <select
           value={sortBy}
@@ -33,7 +32,23 @@ const MarketplaceGrid = () => {
       {/* Items Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
         {SAMPLE_ITEMS.map((item) => (
-          <ItemCard key={item.id} item={item} />
+          <ItemCard
+            key={item.id}
+            item={{
+              id: String(item.id),                 // convert number → string
+              title: item.name,                    // map "name" → "title"
+              description: item.condition || "No description provided", 
+              price: item.price,
+              image_url: item.image,               // map "image" → "image_url"
+              seller_id: "sample-seller-id",       // mock field
+              seller: {                            // mock seller object
+                username: item.location || "Seller",
+                full_name: "Demo User",
+                avatar_url: "/default-avatar.png",
+              },
+              created_at: new Date().toISOString(), // mock date
+            }}
+          />
         ))}
       </div>
 
