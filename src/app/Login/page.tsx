@@ -16,10 +16,20 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false); // Toggle between login and signup
   const [loading, setLoading] = useState(false);
 
+  // ✅ NEW: checkbox state
+  const [agreed, setAgreed] = useState(false);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
+    // ✅ Prevent login if terms not agreed
+    if (!agreed) {
+      setMessage("You must agree to the Terms and Conditions before logging in.");
+      setLoading(false);
+      return;
+    }
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -39,6 +49,13 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
+    // ✅ Prevent signup if terms not agreed
+    if (!agreed) {
+      setMessage("You must agree to the Terms and Conditions before creating an account.");
+      setLoading(false);
+      return;
+    }
 
     // Validate passwords match
     if (password !== confirmPassword) {
@@ -84,6 +101,7 @@ export default function LoginPage() {
     setPassword("");
     setConfirmPassword("");
     setUsername("");
+    setAgreed(false); // reset terms when switching
   };
 
   return (
@@ -137,6 +155,26 @@ export default function LoginPage() {
               className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
           )}
+
+          {/* ✅ Terms & Conditions checkbox */}
+          <label className="flex items-start gap-2 text-sm text-gray-600">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              I agree to the{" "}
+              <a
+                href="/terms"
+                target="_blank"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Terms and Conditions
+              </a>
+            </span>
+          </label>
           
           <button
             type="submit"
