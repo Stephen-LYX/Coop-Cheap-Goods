@@ -49,10 +49,10 @@ export default function SellPage() {
   return (
     <main>
       <Navbar />
-      <div className="flex">
+      <div className="flex min-h-screen">
         <Sidebar />
 
-        <div className="flex-1 p-8">
+        <div className="w-full h-full p-8">
           <h1 className="font-bold text-blue-500 text-2xl mb-6">
             List an Item
           </h1>

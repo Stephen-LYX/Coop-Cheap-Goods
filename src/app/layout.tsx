@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "../component/Navbar";
 import Sidebar from "../component/Sidebar";
 import Providers from "../providers/Providers";
+
 import { AuthProvider } from '../contexts/AuthContext';
 import './globals.css';
 
@@ -28,28 +29,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+
         <AuthProvider>
         <Providers>
           {/* <Navbar /> */}
 
-          {/* Main layout with sidebar and content */}
-          <div className="flex min-h-screen">
-            {/* Sidebar - positioned under navbar */}
-            {/* <Sidebar /> */}
+            {/* Main layout with sidebar and content */}
+            <div className="flex min-h-screen">
+              {/* Sidebar - positioned under navbar */}
+              {/* <Sidebar /> */}
 
-            {/* Main content area */}
-            <div className="flex-1 flex flex-col">
-              <main className="relative overflow-hidden">
-                {children}
-              </main>
+              {/* Main content area */}
+              <div className="flex-1 flex flex-col">
+                <main className="relative overflow-hidden">
+                  {children}
+                </main>
+              </div>
             </div>
+
           </div>
         </Providers>
         </AuthProvider>
+
       </body>
     </html>
   );
