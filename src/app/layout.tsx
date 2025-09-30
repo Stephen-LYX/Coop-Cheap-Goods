@@ -51,7 +51,6 @@ export default function RootLayout({
               </div>
             </div>
 
-          </div>
         </Providers>
         </AuthProvider>
 
