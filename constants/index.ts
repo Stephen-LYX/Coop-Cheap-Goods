@@ -1,10 +1,20 @@
 // NAVIGATION - Updated for eBay-style navbar
-export const NAV_LINKS = [
-  { href: '/Sell', key: 'sell', label: 'Sell'},
-  { href: '/Favorites', key: 'favorites', label: 'Favorites'},
-  { href: '/Inbox', key: 'inbox', label: 'Inbox'},
-  { href: '/Notifications', key: 'notifications', label: 'Notifications' },
-  { href: '/Profile', key: 'profile', label: 'Profile'},
+
+type IconName = "heart" | "mail" | "bell" | "user" | "shopping-cart";
+type NavLink = {
+  href: string;
+  key: string;
+  label: string;
+  type: 'link' | 'button' | 'icon';
+  icon: IconName;
+};
+
+export const NAV_LINKS: NavLink[] = [
+  { href: '/Sell', key: 'sell', label: 'Sell', type: 'button', icon: 'shopping-cart' },
+  { href: '/favorites', key: 'favorites', label: 'Favorites', type: 'link', icon: 'heart' },
+  { href: '/Inbox', key: 'inbox', label: 'Inbox', type: 'link', icon: 'mail' },
+  { href: '/notifications', key: 'notifications', label: 'Notifications', type: 'link', icon: 'bell' },
+  { href: '/profile', key: 'profile', label: 'Profile', type: 'link', icon: 'user' },
 ];
 
 // MARKETPLACE ITEMS

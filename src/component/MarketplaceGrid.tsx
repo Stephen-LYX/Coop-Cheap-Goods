@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import ItemCard from "./ItemCard"
-import { SAMPLE_ITEMS } from "../../constants"
-import { useSearchContext } from "../contexts/SearchContext"
+import { useState } from "react"
+import ItemCard from "./ItemCard" // Import your ItemCard component
+import { SAMPLE_ITEMS } from "../../constants" // Import sample items
 
 const MarketplaceGrid = () => {
   const { searchQuery } = useSearchContext() // Get search query from navbar
@@ -57,7 +56,8 @@ const MarketplaceGrid = () => {
 
   return (
     <div className="p-6">
-      {/* Header with results count and sort */}
+
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
@@ -67,7 +67,7 @@ const MarketplaceGrid = () => {
             {items.length} items {searchQuery.trim() ? 'found' : 'available'}
           </p>
         </div>
-        
+
         {/* Sort Dropdown */}
         <select
           value={sortBy}
@@ -80,27 +80,28 @@ const MarketplaceGrid = () => {
         </select>
       </div>
 
-      {/* Loading State */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="text-gray-600 text-lg">Loading...</div>
-        </div>
-      ) : (
-        <>
-          {/* No Results Message */}
-          {items.length === 0 && searchQuery.trim() && (
-            <div className="text-center py-12">
-              <div className="max-w-md mx-auto">
-                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
-                <p className="text-gray-600 mb-4">
-                  We couldn't find any items matching "{searchQuery}". Try different search terms.
-                </p>
-              </div>
-            </div>
-          )}
+      {/* Items Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+        {SAMPLE_ITEMS.map((item) => (
+          <ItemCard
+            key={item.id}
+            item={{
+              id: String(item.id),                 // convert number → string
+              title: item.name,                    // map "name" → "title"
+              description: item.condition || "No description provided", 
+              price: item.price,
+              image_url: item.image,               // map "image" → "image_url"
+              seller_id: "sample-seller-id",       // mock field
+              seller: {                            // mock seller object
+                username: item.location || "Seller",
+                full_name: "Demo User",
+                avatar_url: "/default-avatar.png",
+              },
+              created_at: new Date().toISOString(), // mock date
+            }}
+          />
+        ))}
+      </div>
 
           {/* Items Grid */}
           {items.length > 0 && (

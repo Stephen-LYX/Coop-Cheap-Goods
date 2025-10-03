@@ -4,7 +4,9 @@ import "./globals.css";
 import Navbar from "../component/Navbar";
 import Sidebar from "../component/Sidebar";
 import Providers from "../providers/Providers";
-import { SearchProvider } from "../contexts/SearchContext";
+
+import { AuthProvider } from '../contexts/AuthContext';
+import './globals.css';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,9 +33,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SearchProvider>
-          <Providers>
-            {/* <Navbar /> */}
+
+        <AuthProvider>
+        <Providers>
+          {/* <Navbar /> */}
 
             {/* Main layout with sidebar and content */}
             <div className="flex min-h-screen">
@@ -47,8 +50,10 @@ export default function RootLayout({
                 </main>
               </div>
             </div>
-          </Providers>
-        </SearchProvider>
+
+        </Providers>
+        </AuthProvider>
+
       </body>
     </html>
   );

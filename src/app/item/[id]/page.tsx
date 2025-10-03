@@ -12,68 +12,84 @@ export default async function Item({
   const { id } = await params;
   const item = SAMPLE_ITEMS[id - 1]; //arrays 0 indexed, so -1 to find correct item
   return (
-    <main>
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <div className=" flex p-8">
-          <div className="flex-none pr-4">
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={125}
-              height={125}
-              className="bg-gray-300 mb-4"
-            ></Image>
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={125}
-              height={125}
-              className="bg-gray-300 mb-4"
-            ></Image>
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={125}
-              height={125}
-              className="bg-gray-300 mb-4"
-            ></Image>
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={125}
-              height={125}
-              className="bg-gray-300 mb-4"
-            ></Image>
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={125}
-              height={125}
-              className="bg-gray-300 mb-4"
-            ></Image>
-          </div>
-          <div className="flex-1">
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={600}
-              height={600}
-              className="bg-gray-300"
-            ></Image>
-          </div>
-          <div className="flex-auto pl-4">
-            <h1 className="font-bold text-500 text-2xl">
-              {item.name} - $
-              {item.price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </h1>
-            <p className="text-xl">Category: </p>
-            <a
-              href="http://localhost:3000/inbox"
-              className="block py-2 my-4 border border-neutral-950 text-center w-auto hover:bg-gray-100 rounded"
-            >
-              Message Seller
+    <main className="p-8 flex">
+      <div className="flex-none pr-4">
+        <Image
+          src={item.image}
+          alt={item.name}
+          width={125}
+          height={125}
+          className="bg-gray-300 mb-4"
+        ></Image>
+        <Image
+          src={item.image}
+          alt={item.name}
+          width={125}
+          height={125}
+          className="bg-gray-300 mb-4"
+        ></Image>
+        <Image
+          src={item.image}
+          alt={item.name}
+          width={125}
+          height={125}
+          className="bg-gray-300 mb-4"
+        ></Image>
+        <Image
+          src={item.image}
+          alt={item.name}
+          width={125}
+          height={125}
+          className="bg-gray-300 mb-4"
+        ></Image>
+        <Image
+          src={item.image}
+          alt={item.name}
+          width={125}
+          height={125}
+          className="bg-gray-300 mb-4"
+        ></Image>
+      </div>
+      <div className="flex-1">
+        <Image
+          src={item.image}
+          alt={item.name}
+          width={600}
+          height={600}
+          className="bg-gray-300"
+        ></Image>
+      </div>
+      <div className="flex-auto pl-4">
+        <h1 className="font-bold text-500 text-2xl">
+          {item.name} - $
+          {item.price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </h1>
+        <p className="text-xl">Size: L</p>
+        <a
+          href="http://localhost:3000/Inbox"
+          className="block py-2 my-4 border border-neutral-950 text-center w-auto hover:bg-gray-100 rounded"
+        >
+          Message Seller
+        </a>
+        <hr className="my-4"></hr>
+        <p>
+          white womens zip-up hoodie<br></br>-authentic and comfortable<br></br>
+          -unnoticable stains, high quality<br></br>-large for men<br></br>-dm
+          for any questions
+        </p>
+        <hr className="my-4"></hr>
+        <div className="flex">
+          <Image
+            src=""
+            alt=""
+            width={50}
+            height={50}
+            className="bg-gray-300 rounded-full"
+          ></Image>
+          <div className="ml-2">
+            <p className="font-bold">Seller Name</p>
+            <a href="" className="text-sm">
+              98% positive reviews
             </a>
             <hr className="my-4"></hr>
             <p>
