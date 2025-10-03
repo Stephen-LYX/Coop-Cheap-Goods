@@ -1,4 +1,4 @@
-"use client"; //client component
+"use client";
 
 import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -12,11 +12,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [newPassword, setNewPassword] = useState(""); // For password reset
   const [message, setMessage] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle between login and signup
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false); // NEW
   const [loading, setLoading] = useState(false);
-
-  // ✅ NEW: checkbox state
   const [agreed, setAgreed] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -24,23 +24,18 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    // ✅ Prevent login if terms not agreed
     if (!agreed) {
       setMessage("You must agree to the Terms and Conditions before logging in.");
       setLoading(false);
       return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setMessage("Error: " + error.message);
-    } else {
+    if (error) setMessage("Error: " + error.message);
+    else {
       setMessage("Login successful! Welcome " + data.user.email);
-      router.push("/Home"); // redirect after login
+      router.push("/Home");
     }
     setLoading(false);
   };
@@ -50,21 +45,18 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    // ✅ Prevent signup if terms not agreed
     if (!agreed) {
       setMessage("You must agree to the Terms and Conditions before creating an account.");
       setLoading(false);
       return;
     }
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       setMessage("Error: Passwords do not match");
       setLoading(false);
       return;
     }
 
-    // Validate password length
     if (password.length < 6) {
       setMessage("Error: Password must be at least 6 characters long");
       setLoading(false);
@@ -74,22 +66,45 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          username: username, // Store username in user metadata
-        },
-      },
+      options: { data: { username } },
     });
 
-    if (error) {
-      setMessage("Error: " + error.message);
-    } else {
+    if (error) setMessage("Error: " + error.message);
+    else {
       if (data.user && !data.user.email_confirmed_at) {
         setMessage("Success! Please check your email to confirm your account.");
       } else {
         setMessage("Account created successfully! Welcome " + data.user?.email);
         router.push("/Home");
       }
+    }
+    setLoading(false);
+  };
+
+  const handleResetRequest = async () => {
+    if (!email) {
+      setMessage("Please enter your email first.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`, // or your preferred page
+    });
+    if (error) setMessage("Error: " + error.message);
+    else setMessage("Password reset link sent! Check your email.");
+    setLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) setMessage("Error: " + error.message);
+    else {
+      setMessage("Password updated! You can now log in.");
+      setIsResettingPassword(false);
+      setNewPassword("");
     }
     setLoading(false);
   };
@@ -101,106 +116,137 @@ export default function LoginPage() {
     setPassword("");
     setConfirmPassword("");
     setUsername("");
-    setAgreed(false); // reset terms when switching
+    setAgreed(false);
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">
-          {isSignUp ? "Create Account" : "Login"}
+          {isResettingPassword ? "Reset Password" : isSignUp ? "Create Account" : "Login"}
         </h1>
-        
-        <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-4">
-          {/* Username field - only show for signup */}
-          {isSignUp && (
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
-          )}
-          
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          />
-          
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          />
-          
-          {/* Confirm password field - only show for signup */}
-          {isSignUp && (
+
+        {isResettingPassword ? (
+          <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
             <input
               type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               required
               minLength={6}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
-          )}
-
-          {/* ✅ Terms & Conditions checkbox */}
-          <label className="flex items-start gap-2 text-sm text-gray-600">
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? "Updating..." : "Update Password"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsResettingPassword(false)}
+              className="text-sm text-blue-600 underline hover:text-blue-700 mt-2"
+            >
+              Back to Login
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-4">
+            {isSignUp && (
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            )}
             <input
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-1"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
-            <span>
-              I agree to the{" "}
-              <a
-                href="/terms"
-                target="_blank"
-                className="text-blue-600 underline hover:text-blue-800"
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+            {isSignUp && (
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            )}
+
+            <label className="flex items-start gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-1"
+              />
+              <span>
+                I agree to the{" "}
+                <a href="/terms" target="_blank" className="text-blue-600 underline hover:text-blue-800">
+                  Terms and Conditions
+                </a>
+              </span>
+            </label>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? "Loading..." : isSignUp ? "Create Account" : "Log In"}
+            </button>
+
+            {!isSignUp && (
+              <button
+                type="button"
+                onClick={handleResetRequest}
+                className="text-sm text-blue-600 underline hover:text-blue-700 mt-2"
               >
-                Terms and Conditions
-              </a>
-            </span>
-          </label>
-          
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Loading..." : (isSignUp ? "Create Account" : "Log In")}
-          </button>
-        </form>
-        
-        {/* Toggle between login and signup */}
-        <div className="mt-4 text-center">
-          <button
-            onClick={toggleMode}
-            className="text-blue-600 hover:text-blue-700 text-sm underline cursor-pointer"
-          >
-            {isSignUp 
-              ? "Already have an account? Log in" 
-              : "Don't have an account? Create one"}
-          </button>
-        </div>
-        
+                Forgot password?
+              </button>
+            )}
+          </form>
+        )}
+
+        {!isResettingPassword && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={toggleMode}
+              className="text-blue-600 hover:text-blue-700 text-sm underline cursor-pointer"
+            >
+              {isSignUp
+                ? "Already have an account? Log in"
+                : "Don't have an account? Create one"}
+            </button>
+          </div>
+        )}
+
         {message && (
-          <p className={`mt-4 text-center text-sm ${
-            message.includes("Error") ? "text-red-600" : "text-green-600"
-          }`}>
+          <p
+            className={`mt-4 text-center text-sm ${
+              message.includes("Error") ? "text-red-600" : "text-green-600"
+            }`}
+          >
             {message}
           </p>
         )}
