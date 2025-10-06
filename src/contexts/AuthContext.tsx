@@ -2,13 +2,13 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { createClientComponentClient, SupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { User } from "@supabase/supabase-js";
+import { User, AuthResponse } from "@supabase/supabase-js";
 
 // 1. Define the shape of your context
 type AuthContextType = {
   user: User | null;
-  login: (email: string, password: string) => Promise<any>;
-  signUp: (email: string, password: string, username: string) => Promise<any>;
+  login: (email: string, password: string) => Promise<AuthResponse>;
+  signUp: (email: string, password: string, username: string) => Promise<AuthResponse>;
   logout: () => Promise<any>;
   loading: boolean;
   supabase: SupabaseClient;
