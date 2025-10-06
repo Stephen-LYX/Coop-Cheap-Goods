@@ -22,6 +22,8 @@ export const SAMPLE_ITEMS = [
   {
     id: 1,
     name: "Vintage Camera Canon AE-1",
+    description: "used for 10 years but kept in good condition",
+    category: "electronics",
     price: 99.00,
     image: "/camera.webp",
     location: "New York, NY",
