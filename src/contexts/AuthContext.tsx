@@ -9,7 +9,7 @@ type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<AuthResponse>;
   signUp: (email: string, password: string, username: string) => Promise<AuthResponse>;
-  logout: () => Promise<any>;
+  logout: () => Promise<{ error: Error | null }>;
   loading: boolean;
   supabase: SupabaseClient;
 };
@@ -60,8 +60,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const logout = async () => {
-    return await supabase.auth.signOut();
+  const logout = async (): Promise<{ error: Error | null }> => {
+    const { error } = await supabase.auth.signOut();
+    return { error };
   };
 
   const value: AuthContextType = {
