@@ -151,7 +151,7 @@ export default function ItemCard({ item }: MarketplaceItemProps) {
                 {item.seller.username}
               </p>
               <p className="text-xs text-gray-500">
-                Posted {new Date(item.created_at).toLocaleDateString()}
+                Posted {new Date(item.  created_at).toLocaleDateString()}
               </p>
             </div>
           </div>
