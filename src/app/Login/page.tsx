@@ -8,6 +8,7 @@ export default function LoginPage() {
   const supabase = createClientComponentClient();
   const router = useRouter();
 
+  // States
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   // 🆕 Forgot password states
   const [isResettingPassword, setIsResettingPassword] = useState(false);
@@ -25,6 +27,12 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
+    if (!agreed) {
+      setMessage("You must agree to the Terms and Conditions before logging in.");
+      setLoading(false);
+      return;
+    }
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -46,6 +54,12 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
+    if (!agreed) {
+      setMessage("You must agree to the Terms and Conditions before creating an account.");
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setMessage("Error: Passwords do not match");
       setLoading(false);
@@ -62,9 +76,7 @@ export default function LoginPage() {
       email,
       password,
       options: {
-        data: {
-          username: username,
-        },
+        data: { username },
       },
     });
 
@@ -81,7 +93,7 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  // 🆕 Handle password reset request
+  // 🆕 Request password reset link
   const handleResetRequest = async () => {
     if (!email) {
       setMessage("Please enter your email first.");
@@ -96,7 +108,7 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  // 🆕 Handle updating password after reset link
+  // 🆕 Update password after reset link
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -120,6 +132,7 @@ export default function LoginPage() {
     setPassword("");
     setConfirmPassword("");
     setUsername("");
+    setAgreed(false);
   };
 
   return (
@@ -161,7 +174,7 @@ export default function LoginPage() {
             </button>
           </form>
         ) : (
-          // --- Normal Login / Signup Form ---
+          // --- Login / Signup Form ---
           <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-4">
             {isSignUp && (
               <input
@@ -205,6 +218,26 @@ export default function LoginPage() {
               />
             )}
 
+            {/* ✅ Terms & Conditions */}
+            <label className="flex items-start gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-1"
+              />
+              <span>
+                I agree to the{" "}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  className="text-blue-600 underline hover:text-blue-800"
+                >
+                  Terms and Conditions
+                </a>
+              </span>
+            </label>
+
             <button
               type="submit"
               disabled={loading}
@@ -213,7 +246,7 @@ export default function LoginPage() {
               {loading ? "Loading..." : isSignUp ? "Create Account" : "Log In"}
             </button>
 
-            {/* 🆕 Forgot password button */}
+            {/* 🆕 Forgot Password */}
             {!isSignUp && (
               <button
                 type="button"
@@ -226,7 +259,7 @@ export default function LoginPage() {
           </form>
         )}
 
-        {/* Toggle between login and signup */}
+        {/* Toggle between login/signup */}
         {!isResettingPassword && (
           <div className="mt-4 text-center">
             <button
