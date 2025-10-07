@@ -6,6 +6,20 @@ import { NAV_LINKS } from "../../constants"
 import { useState } from "react"
 import { useSearchContext } from "../contexts/SearchContext"
 
+// Type definitions
+interface Notification {
+  id: number
+  title: string
+  message: string
+  time: string
+  unread: boolean
+  avatar: string
+}
+
+interface NotificationsDropdownProps {
+  notifications: Notification[]
+}
+
 // Icon components
 const SearchIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +47,7 @@ const LogoutIcon = () => (
 )
 
 // Sample notifications data
-const sampleNotifications = [
+const sampleNotifications: Notification[] = [
   {
     id: 1,
     title: "New message from John",
@@ -68,7 +82,7 @@ const sampleNotifications = [
   }
 ]
 
-const NotificationsDropdown = ({ notifications }) => {
+const NotificationsDropdown = ({ notifications }: NotificationsDropdownProps) => {
   return (
     <div className="absolute right-0 mt-1 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
       {/* Header */}
@@ -150,13 +164,13 @@ const ProfileDropdown = () => {
           <UserIcon />
           <span>Profile</span>
         </Link>
-        <Link
+        {/* <Link
           href="/settings"
           className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
         >
           <SettingsIcon />
           <span>Settings</span>
-        </Link>
+        </Link> */}
         <hr className="my-1 border-gray-200" />
         <Link
           href="/login"
@@ -175,8 +189,8 @@ const Navbar = () => {
   const [localSearchValue, setLocalSearchValue] = useState("")
   const [showNotifications, setShowNotifications] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
-  const [notificationTimeout, setNotificationTimeout] = useState(null)
-  const [profileTimeout, setProfileTimeout] = useState(null)
+  const [notificationTimeout, setNotificationTimeout] = useState<number | null>(null)
+  const [profileTimeout, setProfileTimeout] = useState<number | null>(null)
 
   const handleNotificationHover = () => {
     if (notificationTimeout) {
@@ -189,7 +203,7 @@ const Navbar = () => {
   const handleNotificationLeave = () => {
     const timeout = setTimeout(() => {
       setShowNotifications(false)
-    }, 150)
+    }, 150) as unknown as number
     setNotificationTimeout(timeout)
   }
 
@@ -204,11 +218,11 @@ const Navbar = () => {
   const handleProfileLeave = () => {
     const timeout = setTimeout(() => {
       setShowProfile(false)
-    }, 150)
+    }, 150) as unknown as number
     setProfileTimeout(timeout)
   }
 
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setSearchQuery(localSearchValue)
   }
@@ -229,7 +243,7 @@ const Navbar = () => {
                 height={40} 
                 className="mr-2"
               />
-              <span className="text-2xl font-bold text-blue-600 hidden sm:block">
+              <span className="text-3xl font-bold text-blue-600 hidden sm:block">
                 Coop
               </span>
             </Link>
@@ -274,7 +288,7 @@ const Navbar = () => {
                         href={link.href}
                         className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-gray-900 hover:bg-gray-100 flex items-center space-x-1"
                       >
-                        <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
+                        <span className={'type' in link && link.type === 'icon' ? 'hidden xl:inline' : ''}>
                           {link.label}
                         </span>
                         <span className="bg-red-500 text-white text-xs rounded-full h-2 w-2 ml-1"></span>
@@ -303,7 +317,7 @@ const Navbar = () => {
                       <button
                         className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-gray-900 hover:bg-gray-100 flex items-center space-x-1"
                       >
-                        <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
+                        <span className={'type' in link && link.type === 'icon' ? 'hidden xl:inline' : ''}>
                           {link.label}
                         </span>
                       </button>
@@ -321,12 +335,12 @@ const Navbar = () => {
                   key={link.key} 
                   href={link.href}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                    link.key === 'sell' || link.type === 'button'
+                    link.key === 'sell' || ('type' in link && link.type === 'button')
                       ? 'bg-blue-600 text-white hover:bg-blue-700' 
                       : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                   } flex items-center space-x-1`}
                 >
-                  <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
+                  <span className={'type' in link && link.type === 'icon' ? 'hidden xl:inline' : ''}>
                     {link.label}
                   </span>
                 </Link>

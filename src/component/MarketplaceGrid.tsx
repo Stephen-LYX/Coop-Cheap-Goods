@@ -1,13 +1,33 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import ItemCard from "./ItemCard"
 import { useSearchContext } from "../contexts/SearchContext"
 import { createClient } from "@/utils/supabase/client"
+import { getImageUrl } from "@/utils/imageUtils"
 
-const MarketplaceGrid = () => {
+interface MarketplaceGridProps {
+  category?: string
+}
+
+// Define the Item interface to match your Supabase table structure
+interface Item {
+  id: number
+  title: string
+  description: string | null
+  price: number
+  condition: string
+  category: string
+  image_path: string | null
+  image_url: string | null
+  created_at?: string
+  user_id?: string
+}
+
+const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
   const { searchQuery } = useSearchContext()
-  const [items, setItems] = useState([])
+  const [items, setItems] = useState<Item[]>([])
   const [sortBy, setSortBy] = useState('newest')
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
@@ -19,6 +39,11 @@ const MarketplaceGrid = () => {
       let query = supabase
         .from("items")
         .select("*")
+
+      // Filter by category if provided
+      if (category) {
+        query = query.eq('category', category)
+      }
 
       // Apply sorting
       switch (sortBy) {
@@ -40,7 +65,7 @@ const MarketplaceGrid = () => {
         console.error("Error fetching items:", error)
         setItems([])
       } else {
-        setItems(data || [])
+        setItems(data ?? [])
       }
     } catch (err) {
       console.error("Unexpected error:", err)
@@ -50,10 +75,10 @@ const MarketplaceGrid = () => {
     }
   }
 
-  // Load items on mount and when sort changes
+  // Load items on mount and when sort or category changes
   useEffect(() => {
     fetchItems()
-  }, [sortBy])
+  }, [sortBy, category])
 
   // Filter items based on search query (client-side filtering)
   const filteredItems = items.filter(item => {
@@ -69,16 +94,20 @@ const MarketplaceGrid = () => {
   })
 
   return (
-    <div className="p-6">
+    <div className="px-6 py-4 max-w-7xl mx-auto">
       {/* Header with results count and sort */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {searchQuery.trim() ? `Search Results for "${searchQuery}"` : 'Browse Items'}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            {filteredItems.length} items {searchQuery.trim() ? 'found' : 'available'}
-          </p>
+          {searchQuery.trim() && (
+            <>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Search Results for "{searchQuery}"
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {filteredItems.length} items found
+              </p>
+            </>
+          )}
         </div>
         
         {/* Sort Dropdown */}
@@ -119,9 +148,11 @@ const MarketplaceGrid = () => {
           {filteredItems.length === 0 && !searchQuery.trim() && (
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No items available</h3>
                 <p className="text-gray-600 mb-4">
-                  There are currently no items in the marketplace.
+                  {category 
+                    ? `There are currently no items in the ${category} category.`
+                    : "There are currently no items."
+                  }
                 </p>
               </div>
             </div>
@@ -130,19 +161,22 @@ const MarketplaceGrid = () => {
           {/* Items Grid */}
           {filteredItems.length > 0 && (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-                {filteredItems.map((item) => (
-                  <ItemCard 
-                    key={item.id} 
-                    item={{
-                      id: item.id,
-                      name: item.title,
-                      image: item.image_url || '/placeholder-image.jpg',
-                      condition: item.condition,
-                      price: item.price
-                    }} 
-                  />
-                ))}
+              <div className="w-full px-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {filteredItems.map((item) => (
+                    <ItemCard 
+                      key={item.id} 
+                      item={{
+                        id: item.id,
+                        name: item.title,
+                        // Convert storage path to full URL
+                        image: item.image_path ? getImageUrl(item.image_path) : (item.image_url || '/placeholder.png'),
+                        condition: item.condition,
+                        price: item.price
+                      }} 
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Load More Button - Only show if we're displaying all items (no search) */}
