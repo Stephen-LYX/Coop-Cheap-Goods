@@ -2,58 +2,71 @@
 
 import { useState, useEffect } from "react"
 import ItemCard from "./ItemCard"
-import { SAMPLE_ITEMS } from "../../constants"
 import { useSearchContext } from "../contexts/SearchContext"
+import { createClient } from "@/utils/supabase/client"
 
 const MarketplaceGrid = () => {
-  const { searchQuery } = useSearchContext() // Get search query from navbar
+  const { searchQuery } = useSearchContext()
   const [items, setItems] = useState([])
   const [sortBy, setSortBy] = useState('newest')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
-  // Load all items on component mount
-  useEffect(() => {
-    setItems(SAMPLE_ITEMS)
-  }, [])
+  // Fetch items from Supabase
+  const fetchItems = async () => {
+    setLoading(true)
+    try {
+      let query = supabase
+        .from("items")
+        .select("*")
 
-  // Filter and sort items whenever searchQuery or sortBy changes
-  useEffect(() => {
-    const filterAndSortItems = () => {
-      setLoading(true)
-      
-      // Start with all items
-      let filteredItems = SAMPLE_ITEMS
-
-      // Filter items based on search query from navbar
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim()
-        filteredItems = SAMPLE_ITEMS.filter(item => 
-          item.name.toLowerCase().includes(query) ||
-          item.condition.toLowerCase().includes(query) ||
-          (item.description && item.description.toLowerCase().includes(query)) ||
-          (item.category && item.category.toLowerCase().includes(query))
-        )
+      // Apply sorting
+      switch (sortBy) {
+        case 'price-low':
+          query = query.order('price', { ascending: true })
+          break
+        case 'price-high':
+          query = query.order('price', { ascending: false })
+          break
+        case 'newest':
+        default:
+          query = query.order('id', { ascending: false })
+          break
       }
 
-      // Sort the filtered items
-      const sortedItems = [...filteredItems].sort((a, b) => {
-        switch (sortBy) {
-          case 'price-low':
-            return a.price - b.price
-          case 'price-high':
-            return b.price - a.price
-          case 'newest':
-          default:
-            return b.id - a.id
-        }
-      })
+      const { data, error } = await query
 
-      setItems(sortedItems)
+      if (error) {
+        console.error("Error fetching items:", error)
+        setItems([])
+      } else {
+        setItems(data || [])
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err)
+      setItems([])
+    } finally {
       setLoading(false)
     }
+  }
 
-    filterAndSortItems()
-  }, [searchQuery, sortBy]) // Re-run when search query or sort changes
+  // Load items on mount and when sort changes
+  useEffect(() => {
+    fetchItems()
+  }, [sortBy])
+
+  // Filter items based on search query (client-side filtering)
+  const filteredItems = items.filter(item => {
+    if (!searchQuery.trim()) return true
+    
+    const query = searchQuery.toLowerCase().trim()
+    return (
+      item.title?.toLowerCase().includes(query) ||
+      item.condition?.toLowerCase().includes(query) ||
+      item.description?.toLowerCase().includes(query) ||
+      item.category?.toLowerCase().includes(query)
+    )
+  })
 
   return (
     <div className="p-6">
@@ -64,7 +77,7 @@ const MarketplaceGrid = () => {
             {searchQuery.trim() ? `Search Results for "${searchQuery}"` : 'Browse Items'}
           </h1>
           <p className="text-gray-600 mt-1">
-            {items.length} items {searchQuery.trim() ? 'found' : 'available'}
+            {filteredItems.length} items {searchQuery.trim() ? 'found' : 'available'}
           </p>
         </div>
         
@@ -72,7 +85,7 @@ const MarketplaceGrid = () => {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="text-black px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           <option value="newest">Newest first</option>
           <option value="price-low">Price: Low to High</option>
@@ -88,7 +101,7 @@ const MarketplaceGrid = () => {
       ) : (
         <>
           {/* No Results Message */}
-          {items.length === 0 && searchQuery.trim() && (
+          {filteredItems.length === 0 && searchQuery.trim() && (
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
                 <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,20 +115,44 @@ const MarketplaceGrid = () => {
             </div>
           )}
 
+          {/* No Items in Database */}
+          {filteredItems.length === 0 && !searchQuery.trim() && (
+            <div className="text-center py-12">
+              <div className="max-w-md mx-auto">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No items available</h3>
+                <p className="text-gray-600 mb-4">
+                  There are currently no items in the marketplace.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Items Grid */}
-          {items.length > 0 && (
+          {filteredItems.length > 0 && (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-                {items.map((item) => (
-                  <ItemCard key={item.id} item={item} />
+                {filteredItems.map((item) => (
+                  <ItemCard 
+                    key={item.id} 
+                    item={{
+                      id: item.id,
+                      name: item.title,
+                      image: item.image_url || '/placeholder-image.jpg',
+                      condition: item.condition,
+                      price: item.price
+                    }} 
+                  />
                 ))}
               </div>
 
               {/* Load More Button - Only show if we're displaying all items (no search) */}
               {!searchQuery.trim() && (
                 <div className="flex justify-center mt-8">
-                  <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200">
-                    Load More Items
+                  <button 
+                    onClick={fetchItems}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200"
+                  >
+                    Refresh Items
                   </button>
                 </div>
               )}

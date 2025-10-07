@@ -4,31 +4,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { NAV_LINKS } from "../../constants"
 import { useState } from "react"
-import { useSearchContext } from "../contexts/SearchContext" // New import
+import { useSearchContext } from "../contexts/SearchContext"
 
-// Icon components (you can replace these with your preferred icon library)
+// Icon components
 const SearchIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-  </svg>
-)
-
-const HeartIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-)
-
-const MailIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  </svg>
-)
-
-const BellIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5-5h5M6 17h5v-5H6v5z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9z" />
   </svg>
 )
 
@@ -38,19 +19,20 @@ const UserIcon = () => (
   </svg>
 )
 
-const ShoppingCartIcon = () => (
+const SettingsIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293A1 1 0 006 17h12M9 19a2 2 0 11-4 0 2 2 0 014 0zM20 19a2 2 0 11-4 0 2 2 0 014 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 )
 
-const MenuIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+const LogoutIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
   </svg>
 )
 
-// Sample notifications data - replace with your actual data
+// Sample notifications data
 const sampleNotifications = [
   {
     id: 1,
@@ -103,7 +85,6 @@ const NotificationsDropdown = ({ notifications }) => {
       <div className="max-h-96 overflow-y-auto">
         {notifications.length === 0 ? (
           <div className="px-4 py-8 text-center text-gray-500">
-            <BellIcon />
             <p className="mt-2">No notifications yet</p>
           </div>
         ) : (
@@ -117,7 +98,6 @@ const NotificationsDropdown = ({ notifications }) => {
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <BellIcon />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -159,22 +139,44 @@ const NotificationsDropdown = ({ notifications }) => {
   )
 }
 
-const getIcon = (iconName) => {
-  const icons = {
-    heart: <HeartIcon />,
-    mail: <MailIcon />,
-    bell: <BellIcon />,
-    user: <UserIcon />,
-    'shopping-cart': <ShoppingCartIcon />
-  }
-  return icons[iconName] || null
+const ProfileDropdown = () => {
+  return (
+    <div className="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+      <div className="py-1">
+        <Link
+          href="/profile"
+          className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+        >
+          <UserIcon />
+          <span>Profile</span>
+        </Link>
+        <Link
+          href="/settings"
+          className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+        >
+          <SettingsIcon />
+          <span>Settings</span>
+        </Link>
+        <hr className="my-1 border-gray-200" />
+        <Link
+          href="/login"
+          className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+        >
+          <LogoutIcon />
+          <span>Logout</span>
+        </Link>
+      </div>
+    </div>
+  )
 }
 
 const Navbar = () => {
-  const { searchQuery, setSearchQuery } = useSearchContext() // Use search context
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { setSearchQuery } = useSearchContext()
+  const [localSearchValue, setLocalSearchValue] = useState("")
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
   const [notificationTimeout, setNotificationTimeout] = useState(null)
+  const [profileTimeout, setProfileTimeout] = useState(null)
 
   const handleNotificationHover = () => {
     if (notificationTimeout) {
@@ -187,14 +189,28 @@ const Navbar = () => {
   const handleNotificationLeave = () => {
     const timeout = setTimeout(() => {
       setShowNotifications(false)
-    }, 150) // Small delay to allow mouse movement to dropdown
+    }, 150)
     setNotificationTimeout(timeout)
+  }
+
+  const handleProfileHover = () => {
+    if (profileTimeout) {
+      clearTimeout(profileTimeout)
+      setProfileTimeout(null)
+    }
+    setShowProfile(true)
+  }
+
+  const handleProfileLeave = () => {
+    const timeout = setTimeout(() => {
+      setShowProfile(false)
+    }, 150)
+    setProfileTimeout(timeout)
   }
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
-    // Search is automatically handled by the context, but you could add
-    // additional logic here like navigation to search results page
+    setSearchQuery(localSearchValue)
   }
 
   return (
@@ -205,7 +221,7 @@ const Navbar = () => {
           
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/Home" className="flex-shrink-0 flex items-center">
+            <Link href="/home" className="flex-shrink-0 flex items-center">
               <Image 
                 src="/chicken.png" 
                 alt="logo" 
@@ -220,21 +236,23 @@ const Navbar = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-4 hidden md:block">
+          <div className="flex-1 max-w-2xl mx-4 hidden md:block text-black">
             <form onSubmit={handleSearchSubmit} className="relative">
-              <input
-                type="text"
-                placeholder="Search for anything"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <button 
-                type="submit"
-                className="absolute right-0 top-0 bottom-0 bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-r-full transition-colors duration-200"
-              >
-                <SearchIcon />
-              </button>
+              <div className="flex border border-2 border-black rounded-full overflow-hidden">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={localSearchValue}
+                  onChange={(e) => setLocalSearchValue(e.target.value)}
+                  className="flex-1 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-none"
+                />
+                <button 
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 transition-colors duration-200"
+                >
+                  <SearchIcon />
+                </button>
+              </div>
             </form>
           </div>
 
@@ -254,13 +272,8 @@ const Navbar = () => {
                     >
                       <Link 
                         href={link.href}
-                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                          link.type === 'button' 
-                            ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                        } flex items-center space-x-1`}
+                        className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-gray-900 hover:bg-gray-100 flex items-center space-x-1"
                       >
-                        {link.icon && getIcon(link.icon)}
                         <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
                           {link.label}
                         </span>
@@ -271,6 +284,32 @@ const Navbar = () => {
                       {showNotifications && (
                         <NotificationsDropdown notifications={sampleNotifications} />
                       )}
+                    </div>
+                  </div>
+                )
+              }
+
+              // Special handling for profile
+              if (link.key === 'profile') {
+                return (
+                  <div 
+                    key={link.key}
+                    className="relative"
+                  >
+                    <div
+                      onMouseEnter={handleProfileHover}
+                      onMouseLeave={handleProfileLeave}
+                    >
+                      <button
+                        className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-gray-900 hover:bg-gray-100 flex items-center space-x-1"
+                      >
+                        <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
+                          {link.label}
+                        </span>
+                      </button>
+                      
+                      {/* Profile Dropdown */}
+                      {showProfile && <ProfileDropdown />}
                     </div>
                   </div>
                 )
@@ -287,29 +326,12 @@ const Navbar = () => {
                       : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                   } flex items-center space-x-1`}
                 >
-                  {link.icon && getIcon(link.icon)}
                   <span className={link.type === 'icon' ? 'hidden xl:inline' : ''}>
                     {link.label}
                   </span>
                 </Link>
               )
             })}
-            
-            {/* Cart Icon - Now positioned last and styled as blue button */}
-            {NAV_LINKS.find(link => link.key === 'cart') && (
-              <Link 
-                href={NAV_LINKS.find(link => link.key === 'cart').href}
-                className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-blue-600 text-white hover:bg-blue-700 flex items-center space-x-1 relative"
-              >
-                <ShoppingCartIcon />
-                <span className="hidden xl:inline">
-                  {NAV_LINKS.find(link => link.key === 'cart').label}
-                </span>
-                <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-1">
-                  3
-                </span>
-              </Link>
-            )}
           </div>
         </div>
       </div>

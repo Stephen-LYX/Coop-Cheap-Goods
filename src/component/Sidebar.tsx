@@ -148,7 +148,7 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
 
   return (
-    <div className={`bg-[#FFFBDE] border-r border-gray-200 shadow-sm transition-all duration-300 ${
+    <div className={`bg-[#FFFBDE] border-r border-gray-200 shadow-sm transition-all duration-300 h-screen ${
       isCollapsed ? 'w-16' : 'w-64'
     } flex-shrink-0`}>
       
