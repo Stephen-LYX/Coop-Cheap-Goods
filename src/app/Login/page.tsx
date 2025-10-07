@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 export default function LoginPage() {
   const supabase = createClientComponentClient();
@@ -138,17 +137,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm rounded-2xl bg-[#FFFBDE] p-8 shadow-lg border-2 border-black">
-        {/* Logo */}
-        <div className="mb-6 flex justify-center">
-          <Image
-            src="/chicken.png"
-            alt="Chicken Logo"
-            width={80}
-            height={80}
-            className="object-contain"
-          />
-        </div>
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">
           {isResettingPassword
             ? "Reset Password"
@@ -167,7 +156,7 @@ export default function LoginPage() {
               onChange={(e) => setNewPassword(e.target.value)}
               required
               minLength={6}
-              className="bg-white rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 text-black"
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
             <button
               type="submit"

@@ -52,7 +52,7 @@ export default function LiveChat() {
 
     useEffect(() => {
         if (!loading && !user) {
-            router.push('/Login');
+            router.push('/login');
             return;
         }
 
