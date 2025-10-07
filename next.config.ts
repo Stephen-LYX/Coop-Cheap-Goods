@@ -14,7 +14,12 @@ const nextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**',
       },
-      // Add other image hostnames as needed
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/sign/**',
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
@@ -25,6 +30,6 @@ const nextConfig = {
       },
     ],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
