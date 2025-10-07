@@ -5,7 +5,6 @@ import Image from "next/image"
 import ItemCard from "./ItemCard"
 import { useSearchContext } from "../contexts/SearchContext"
 import { createClient } from "@/utils/supabase/client"
-import { getImageUrl } from "@/utils/imageUtils"
 
 interface MarketplaceGridProps {
   category?: string
