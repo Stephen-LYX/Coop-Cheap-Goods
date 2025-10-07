@@ -96,49 +96,49 @@ export default function LiveChat() {
 
     const fetchConversations = async () => {
         try {
+            console.log("Current logged in user:", user);
+
             const { data, error } = await supabase
-                .from('conversations')
-                .select(`
-                    *,
-                    buyer:profiles!buyer_id(*),
-                    seller:profiles!seller_id(*),
-                    item:marketplace_items(title, image_url),
-                    messages!inner(id)
-                `)
-                .or(`buyer_id.eq.${user?.id},seller_id.eq.${user?.id}`)
-                .order('last_message_at', { ascending: false });
+            .from('conversations')
+            .select(`
+                *,
+                buyer:profiles!buyer_id(*),
+                seller:profiles!seller_id(*),
+                item:items(title, image_url)
+            `)
+            .or(`buyer_id.eq.${user?.id},seller_id.eq.${user?.id}`)
+            .order('last_message_at', { ascending: false });
 
             if (error) throw error;
 
             const conversationsWithUnread = await Promise.all(
-                (data || []).map(async (conv) => {
-                    // Get unread message count
-                    const { count } = await supabase
-                        .from('messages')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('conversation_id', conv.id)
-                        .eq('receiver_id', user?.id)
-                        .eq('is_read', false);
+            (data || []).map(async (conv) => {
+                const { count } = await supabase
+                .from('messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('conversation_id', conv.id)
+                .eq('receiver_id', user?.id)
+                .eq('is_read', false);
 
-                    // Determine the other user
-                    const isCurrentUserBuyer = conv.buyer_id === user?.id;
-                    const otherUser = isCurrentUserBuyer ? conv.seller : conv.buyer;
+                const isCurrentUserBuyer = conv.buyer_id === user?.id;
+                const otherUser = isCurrentUserBuyer ? conv.seller : conv.buyer;
 
-                    return {
-                        ...conv,
-                        other_user: otherUser,
-                        unread_count: count || 0
-                    };
-                })
-            );
+                return {
+                ...conv,
+                other_user: otherUser,
+                unread_count: count || 0,
+                };
+            })
+        );
 
-            setConversations(conversationsWithUnread);
-        } catch (error) {
-            console.error('Error fetching conversations:', error);
-        } finally {
-            setLoadingConversations(false);
-        }
-    };
+    setConversations(conversationsWithUnread);
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+  } finally {
+    setLoadingConversations(false);
+  }
+};
+
 
     const fetchMessages = async (conversationId: string) => {
         setLoadingMessages(true);
