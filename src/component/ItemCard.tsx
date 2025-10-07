@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 import { useItemContext } from "../contexts/ItemContext"
 
 const HeartIcon = ({ filled = false }) => (
@@ -23,6 +24,7 @@ interface ItemCardProperty {
 function ItemCard({ item }: ItemCardProperty) {
   const { isFavorite, addToFavorites, removeFromFavorites } = useItemContext()
   const favorite = isFavorite(item.id)
+  const [imageError, setImageError] = useState(false)
 
   function onFavoriteClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault()
@@ -33,6 +35,22 @@ function ItemCard({ item }: ItemCardProperty) {
     }
   }
 
+  // Check if image URL is valid
+  const isValidUrl = (urlString: string) => {
+    if (!urlString) return false
+    try {
+      new URL(urlString)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const hasValidImage = isValidUrl(item.image) && !imageError
+  
+  // Placeholder image as data URL (a simple gray square with "No Image" text)
+  const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%2364748b'%3ENo Image%3C/text%3E%3C/svg%3E"
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 group">
       <Link href={`/item/${item.id}`} className="block">
@@ -40,11 +58,12 @@ function ItemCard({ item }: ItemCardProperty) {
           {/* Item Image */}
           <div className="aspect-square relative overflow-hidden rounded-t-lg bg-gray-100">
             <Image
-              src={item.image}
+              src={hasValidImage ? item.image : placeholderImage}
               alt={item.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-200"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              onError={() => setImageError(true)}
             />
             {/* Wishlist Button Overlay */}
             <div className="absolute inset-0">
