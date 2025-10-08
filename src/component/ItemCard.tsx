@@ -35,21 +35,20 @@ function ItemCard({ item }: ItemCardProperty) {
     }
   }
 
-  // Check if image URL is valid
-  const isValidUrl = (urlString: string) => {
-    if (!urlString) return false
-    try {
-      new URL(urlString)
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  const hasValidImage = isValidUrl(item.image) && !imageError
-  
   // Placeholder image as data URL (a simple gray square with "No Image" text)
   const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%2364748b'%3ENo Image%3C/text%3E%3C/svg%3E"
+
+  // Determine the image source
+  const getImageSrc = () => {
+    if (imageError) return placeholderImage
+    if (!item.image) return placeholderImage
+    
+    // If it's already a full path starting with /, use it as is
+    if (item.image.startsWith('/')) return item.image
+    
+    // If it's just a filename, prepend /uploaded/
+    return `/uploaded/${item.image}`
+  }
 
   return (
     <div className="bg-white rounded-lg hover:shadow-md transition-shadow duration-200 group w-full">
@@ -58,7 +57,7 @@ function ItemCard({ item }: ItemCardProperty) {
           {/* Item Image */}
           <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100 border border-gray-200 shadow-sm">
             <Image
-              src={hasValidImage ? item.image : placeholderImage}
+              src={getImageSrc()}
               alt={item.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-200"

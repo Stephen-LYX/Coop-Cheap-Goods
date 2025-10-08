@@ -1,4 +1,3 @@
-// src/app/Login/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -11,39 +10,30 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [newPassword, setNewPassword] = useState(""); // For password reset
   const [message, setMessage] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false); // NEW
   const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    try {
-      console.log("🔵 Attempting login for:", email);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        console.error("❌ Login error:", error);
-        setMessage("Error: " + error.message);
-        setLoading(false);
-        return;
-      }
-
-      console.log("✅ Login API returned user:", data.user?.id);
-
-      // Confirm session is now present
-      const { data: sessionData } = await supabase.auth.getSession();
-      console.log("🟢 Session after login:", sessionData.session?.user ?? sessionData);
-
-      // redirect to home or inbox after successful sign-in
-      router.push("/home");
-    } catch (err: any) {
-      console.error("Network/login error:", err);
-      setMessage("Network error");
-    } finally {
+    if (!agreed) {
+      setMessage("You must agree to the Terms and Conditions before logging in.");
       setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) setMessage("Error: " + error.message);
+    else {
+      setMessage("Login successful! Welcome " + data.user.email);
+      router.push("/Home");
     }
   };
 
@@ -51,6 +41,12 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
+    if (!agreed) {
+      setMessage("You must agree to the Terms and Conditions before creating an account.");
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setMessage("Error: Passwords do not match");
@@ -64,16 +60,16 @@ export default function LoginPage() {
       return;
     }
 
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { username } },
-      });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username } },
+    });
 
-      if (error) {
-        console.error("❌ Signup error:", error);
-        setMessage("Error: " + error.message);
+    if (error) setMessage("Error: " + error.message);
+    else {
+      if (data.user && !data.user.email_confirmed_at) {
+        setMessage("Success! Please check your email to confirm your account.");
       } else {
         console.log("✅ Signup success:", data.user?.id);
         setMessage("Account created. Check email to confirm or you'll be redirected.");
@@ -88,6 +84,34 @@ export default function LoginPage() {
     }
   };
 
+  const handleResetRequest = async () => {
+    if (!email) {
+      setMessage("Please enter your email first.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`, // or your preferred page
+    });
+    if (error) setMessage("Error: " + error.message);
+    else setMessage("Password reset link sent! Check your email.");
+    setLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) setMessage("Error: " + error.message);
+    else {
+      setMessage("Password updated! You can now log in.");
+      setIsResettingPassword(false);
+      setNewPassword("");
+    }
+    setLoading(false);
+  };
+
   const toggleMode = () => {
     setIsSignUp(!isSignUp);
     setMessage("");
@@ -95,33 +119,140 @@ export default function LoginPage() {
     setPassword("");
     setConfirmPassword("");
     setUsername("");
+    setAgreed(false);
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">{isSignUp ? "Create Account" : "Login"}</h1>
+        <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">
+          {isResettingPassword ? "Reset Password" : isSignUp ? "Create Account" : "Login"}
+        </h1>
 
-        <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-4">
-          {isSignUp && (
-            <input value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="Username" className="rounded-lg border px-4 py-2"/>
-          )}
-          <input value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" type="email" className="rounded-lg border px-4 py-2"/>
-          <input value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Password" type="password" className="rounded-lg border px-4 py-2"/>
-          {isSignUp && <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required placeholder="Confirm password" type="password" className="rounded-lg border px-4 py-2"/>}
+        {isResettingPassword ? (
+          <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
+            <input
+              type="password"
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              minLength={6}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? "Updating..." : "Update Password"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsResettingPassword(false)}
+              className="text-sm text-blue-600 underline hover:text-blue-700 mt-2"
+            >
+              Back to Login
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-4">
+            {isSignUp && (
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            )}
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+            {isSignUp && (
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            )}
 
-          <button type="submit" disabled={loading} className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700">
-            {loading ? "Loading..." : (isSignUp ? "Create Account" : "Log In")}
-          </button>
-        </form>
+            <label className="flex items-start gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-1"
+              />
+              <span>
+                I agree to the{" "}
+                <a href="/terms" target="_blank" className="text-blue-600 underline hover:text-blue-800">
+                  Terms and Conditions
+                </a>
+              </span>
+            </label>
 
-        <div className="mt-4 text-center">
-          <button onClick={toggleMode} className="text-blue-600 text-sm underline">
-            {isSignUp ? "Already have an account? Log in" : "Don't have an account? Create one"}
-          </button>
-        </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? "Loading..." : isSignUp ? "Create Account" : "Log In"}
+            </button>
 
-        {message && <p className={`mt-4 text-center text-sm ${message.includes("Error") ? "text-red-600" : "text-green-600"}`}>{message}</p>}
+            {!isSignUp && (
+              <button
+                type="button"
+                onClick={handleResetRequest}
+                className="text-sm text-blue-600 underline hover:text-blue-700 mt-2"
+              >
+                Forgot password?
+              </button>
+            )}
+          </form>
+        )}
+
+        {!isResettingPassword && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={toggleMode}
+              className="text-blue-600 hover:text-blue-700 text-sm underline cursor-pointer"
+            >
+              {isSignUp
+                ? "Already have an account? Log in"
+                : "Don't have an account? Create one"}
+            </button>
+          </div>
+        )}
+
+        {message && (
+          <p
+            className={`mt-4 text-center text-sm ${
+              message.includes("Error") ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {message}
+          </p>
+        )}
       </div>
     </div>
   );

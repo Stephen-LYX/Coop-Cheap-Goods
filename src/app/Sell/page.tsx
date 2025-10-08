@@ -2,36 +2,75 @@
 
 import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 import Navbar from "@/component/Navbar";
 import Sidebar from "@/component/Sidebar";
 
 export default function SellPage() {
   const supabase = createClientComponentClient();
+  const router = useRouter();
 
-  const [productName, setProductName] = useState("");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+  const [category, setCategory] = useState(""); 
+  const [image, setImage] = useState<File | null>(null);
   const [message, setMessage] = useState("");
 
-  // Handle image selection (stored in state, saved to /public/uploads later)
+  const categories = ["Electronics", "Clothing", "Books", "Home", "Other"]; // dropdown options
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
     }
   };
 
-  // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Insert product into Supabase (without image storage)
-    const { error } = await supabase.from("products").insert([
+    if (!image) {
+      setMessage("Please select an image.");
+      return;
+    }
+
+    // Upload image to /public/uploaded
+    const formData = new FormData();
+    formData.append("image", image);
+
+    const uploadRes = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const uploadData = await uploadRes.json();
+
+    if (!uploadRes.ok) {
+      setMessage("Image upload failed: " + uploadData.error);
+      return;
+    }
+
+    const imageUrl = uploadData.filename;
+
+    // Get logged-in user UID from Supabase Auth
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setMessage("You must be logged in to list an item.");
+      return;
+    }
+
+    // Insert item into Supabase directly linked to Auth UID
+    const { error } = await supabase.from("items").insert([
       {
-        name: productName,
+        user_id: user.id, // <-- directly from Supabase Auth
+        title,
         description,
         price: parseFloat(price),
-        images: images.map((img) => img.name), // store filenames only
+        category,
+        image_url: imageUrl,
+        is_active: true,
       },
     ]);
 
@@ -39,20 +78,21 @@ export default function SellPage() {
       setMessage("Error: " + error.message);
     } else {
       setMessage("Item listed successfully!");
-      setProductName("");
+      setTitle("");
       setDescription("");
       setPrice("");
-      setImages([]);
+      setCategory("");
+      setImage(null);
     }
   };
 
   return (
     <main>
       <Navbar />
-      <div className="flex min-h-screen">
+      <div className="flex">
         <Sidebar />
 
-        <div className="w-full h-full p-8">
+        <div className="flex-1 p-8">
           <h1 className="font-bold text-blue-500 text-2xl mb-6">
             List an Item
           </h1>
@@ -63,9 +103,9 @@ export default function SellPage() {
           >
             <input
               type="text"
-              placeholder="Product Name"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               required
             />
@@ -88,12 +128,28 @@ export default function SellPage() {
               required
             />
 
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              required
+            >
+              <option value="" disabled>
+                Select Category
+              </option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+
             <input
               type="file"
-              multiple
               accept="image/*"
               onChange={handleImageChange}
               className="text-sm text-gray-600"
+              required
             />
 
             <button
@@ -106,22 +162,6 @@ export default function SellPage() {
 
           {message && (
             <p className="mt-4 text-center text-sm text-green-600">{message}</p>
-          )}
-
-          {images.length > 0 && (
-            <div className="mt-6">
-              <h2 className="font-semibold text-lg mb-2">Preview:</h2>
-              <div className="flex gap-4 flex-wrap">
-                {images.map((img, index) => (
-                  <p
-                    key={index}
-                    className="text-sm text-gray-700 border p-2 rounded-lg"
-                  >
-                    {img.name}
-                  </p>
-                ))}
-              </div>
-            </div>
           )}
         </div>
       </div>

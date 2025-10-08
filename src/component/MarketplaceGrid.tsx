@@ -168,8 +168,7 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
                       item={{
                         id: item.id,
                         name: item.title,
-                        // Convert storage path to full URL
-                        image: item.image_path ? getImageUrl(item.image_path) : (item.image_url || '/placeholder.png'),
+                        image: item.image_url || '',
                         condition: item.condition,
                         price: item.price
                       }} 

@@ -1,5 +1,12 @@
 "use client"
 
+import { Vidaloka } from 'next/font/google'
+
+const vidaloka = Vidaloka({ 
+  weight: '400',
+  subsets: ['latin'],
+})
+
 import Image from "next/image"
 import Link from "next/link"
 import { NAV_LINKS } from "../../constants"
@@ -243,7 +250,7 @@ const Navbar = () => {
                 height={40} 
                 className="mr-2"
               />
-              <span className="text-3xl font-bold text-blue-600 hidden sm:block">
+              <span className={`text-4xl font-black text-blue-600 hidden sm:block ${vidaloka.className}`}>
                 Coop
               </span>
             </Link>
