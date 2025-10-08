@@ -2,129 +2,255 @@
 
 import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import Navbar from "@/component/Navbar";
-import Sidebar from "@/component/Sidebar";
+import { useRouter } from "next/navigation";
 
-export default function SellPage() {
+export default function LoginPage() {
   const supabase = createClientComponentClient();
+  const router = useRouter();
 
-  const [productName, setProductName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [newPassword, setNewPassword] = useState(""); // For password reset
   const [message, setMessage] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false); // NEW
+  const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
-  // Handle image selection (stored in state, saved to /public/uploads later)
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
+    if (!agreed) {
+      setMessage("You must agree to the Terms and Conditions before logging in.");
+      setLoading(false);
+      return;
     }
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) setMessage("Error: " + error.message);
+    else {
+      setMessage("Login successful! Welcome " + data.user.email);
+      router.push("/Home");
+    }
+    setLoading(false);
   };
 
-  // Handle submit
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-    // Insert product into Supabase (without image storage)
-    const { error } = await supabase.from("products").insert([
-      {
-        name: productName,
-        description,
-        price: parseFloat(price),
-        images: images.map((img) => img.name), // store filenames only
-      },
-    ]);
-
-    if (error) {
-      setMessage("Error: " + error.message);
-    } else {
-      setMessage("Item listed successfully!");
-      setProductName("");
-      setDescription("");
-      setPrice("");
-      setImages([]);
+    if (!agreed) {
+      setMessage("You must agree to the Terms and Conditions before creating an account.");
+      setLoading(false);
+      return;
     }
+
+    if (password !== confirmPassword) {
+      setMessage("Error: Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage("Error: Password must be at least 6 characters long");
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username } },
+    });
+
+    if (error) setMessage("Error: " + error.message);
+    else {
+      if (data.user && !data.user.email_confirmed_at) {
+        setMessage("Success! Please check your email to confirm your account.");
+      } else {
+        setMessage("Account created successfully! Welcome " + data.user?.email);
+        router.push("/Home");
+      }
+    }
+    setLoading(false);
+  };
+
+  const handleResetRequest = async () => {
+    if (!email) {
+      setMessage("Please enter your email first.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`, // or your preferred page
+    });
+    if (error) setMessage("Error: " + error.message);
+    else setMessage("Password reset link sent! Check your email.");
+    setLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) setMessage("Error: " + error.message);
+    else {
+      setMessage("Password updated! You can now log in.");
+      setIsResettingPassword(false);
+      setNewPassword("");
+    }
+    setLoading(false);
+  };
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
+    setMessage("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setUsername("");
+    setAgreed(false);
   };
 
   return (
-    <main>
-      <Navbar />
-      <div className="flex min-h-screen">
-        <Sidebar />
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
+        <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">
+          {isResettingPassword ? "Reset Password" : isSignUp ? "Create Account" : "Login"}
+        </h1>
 
-        <div className="w-full h-full p-8">
-          <h1 className="font-bold text-blue-500 text-2xl mb-6">
-            List an Item
-          </h1>
-
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-4 max-w-lg bg-white shadow-lg p-6 rounded-2xl"
-          >
+        {isResettingPassword ? (
+          <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
             <input
-              type="text"
-              placeholder="Product Name"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              type="password"
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               required
-            />
-
-            <textarea
-              placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              minLength={6}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              rows={4}
-              required
             />
-
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? "Updating..." : "Update Password"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsResettingPassword(false)}
+              className="text-sm text-blue-600 underline hover:text-blue-700 mt-2"
+            >
+              Back to Login
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-4">
+            {isSignUp && (
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            )}
             <input
-              type="number"
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
-
             <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImageChange}
-              className="text-sm text-gray-600"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
+            {isSignUp && (
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            )}
+
+            <label className="flex items-start gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-1"
+              />
+              <span>
+                I agree to the{" "}
+                <a href="/terms" target="_blank" className="text-blue-600 underline hover:text-blue-800">
+                  Terms and Conditions
+                </a>
+              </span>
+            </label>
 
             <button
               type="submit"
-              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 transition-colors"
+              disabled={loading}
+              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
             >
-              List Item
+              {loading ? "Loading..." : isSignUp ? "Create Account" : "Log In"}
             </button>
+
+            {!isSignUp && (
+              <button
+                type="button"
+                onClick={handleResetRequest}
+                className="text-sm text-blue-600 underline hover:text-blue-700 mt-2"
+              >
+                Forgot password?
+              </button>
+            )}
           </form>
+        )}
 
-          {message && (
-            <p className="mt-4 text-center text-sm text-green-600">{message}</p>
-          )}
+        {!isResettingPassword && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={toggleMode}
+              className="text-blue-600 hover:text-blue-700 text-sm underline cursor-pointer"
+            >
+              {isSignUp
+                ? "Already have an account? Log in"
+                : "Don't have an account? Create one"}
+            </button>
+          </div>
+        )}
 
-          {images.length > 0 && (
-            <div className="mt-6">
-              <h2 className="font-semibold text-lg mb-2">Preview:</h2>
-              <div className="flex gap-4 flex-wrap">
-                {images.map((img, index) => (
-                  <p
-                    key={index}
-                    className="text-sm text-gray-700 border p-2 rounded-lg"
-                  >
-                    {img.name}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        {message && (
+          <p
+            className={`mt-4 text-center text-sm ${
+              message.includes("Error") ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {message}
+          </p>
+        )}
       </div>
-    </main>
+    </div>
   );
 }
