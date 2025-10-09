@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Navbar from "@/component/Navbar";
 import Sidebar from "@/component/Sidebar";
@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function SellPage() {
   const { user, loading } = useAuth();
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const router = useRouter();
 
   const [title, setTitle] = useState("");
