@@ -1,11 +1,12 @@
+"use client";
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-export const createClient = () =>
-  createBrowserClient(
-    supabaseUrl!,
-    supabaseKey!,
-  );
+/**
+ * Returns a Supabase client that is fully session-aware
+ * and compatible with @supabase/auth-helpers-nextjs.
+ *
+ * This ensures user authentication, cookies, and session
+ * persistence all work correctly across your Next.js app.
+ */
+export const createClient = () => createClientComponentClient();
