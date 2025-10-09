@@ -52,7 +52,7 @@ const ToysIcon = () => (
   </svg>
 )
 
-type IconName = 'clothing' | 'furniture' | 'electronics' | 'books' | 'sports' | 'home-garden' | 'beauty' | 'toys';
+type IconName = 'clothing' | 'furniture' | 'electronics' | 'books' | 'sports-outdoor' | 'home-garden' | 'beauty-health' | 'toys-games';
 
 interface Category {
   key: string;
@@ -89,7 +89,7 @@ const CATEGORIES: Category[] = [
   {
     key: 'sports',
     label: 'Sports & Outdoors',
-    href: '/categories/sports',
+    href: '/categories/sports-outdoors',
     icon: 'sports'
   },
   {
@@ -101,13 +101,13 @@ const CATEGORIES: Category[] = [
   {
     key: 'beauty',
     label: 'Beauty & Health',
-    href: '/categories/beauty',
+    href: '/categories/beauty-health',
     icon: 'beauty'
   },
   {
     key: 'toys',
     label: 'Toys & Games',
-    href: '/categories/toys',
+    href: '/categories/toys-games',
     icon: 'toys'
   }
 ]

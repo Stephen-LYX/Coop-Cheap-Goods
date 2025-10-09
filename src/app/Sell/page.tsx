@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import Navbar from "@/component/Navbar";
 import Sidebar from "@/component/Sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SellPage() {
+  const { user, loading } = useAuth();
   const supabase = createClientComponentClient();
   const router = useRouter();
 
@@ -85,6 +87,15 @@ export default function SellPage() {
       setImage(null);
     }
   };
+
+  useEffect(() => {
+      const checkUser = async () => {
+        const { data } = await supabase.auth.getSession();
+        console.log("🟢 Supabase session user:", data.session?.user?.id);
+        console.log("🟣 AuthContext user:", user?.id);
+      };
+      checkUser();
+    }, [supabase, user]);
 
   return (
     <main>

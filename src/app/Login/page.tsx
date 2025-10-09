@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [newPassword, setNewPassword] = useState(""); // For password reset
   const [message, setMessage] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false); // NEW
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
 
@@ -28,12 +28,20 @@ export default function LoginPage() {
       return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) setMessage("Error: " + error.message);
-    else {
-      setMessage("Login successful! Welcome " + data.user.email);
-      router.push("/Home");
+      if (error) {
+        setMessage("Error: " + error.message);
+      } else {
+        setMessage("Login successful! Welcome " + data.user.email);
+        router.push("/home");
+      }
+    } catch (err: any) {
+      console.error("Login network error:", err);
+      setMessage("Network error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,21 +68,23 @@ export default function LoginPage() {
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { username } },
-    });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username } },
+      });
 
-    if (error) setMessage("Error: " + error.message);
-    else {
-      if (data.user && !data.user.email_confirmed_at) {
-        setMessage("Success! Please check your email to confirm your account.");
+      if (error) {
+        setMessage("Error: " + error.message);
       } else {
-        console.log("✅ Signup success:", data.user?.id);
-        setMessage("Account created. Check email to confirm or you'll be redirected.");
-        // some flows require email confirmation; if not, you can redirect:
-        router.push("/home");
+        if (data.user && !data.user.email_confirmed_at) {
+          setMessage("Success! Please check your email to confirm your account.");
+        } else {
+          console.log("✅ Signup success:", data.user?.id);
+          setMessage("Account created. Check email to confirm or you'll be redirected.");
+          router.push("/Home");
+        }
       }
     } catch (err: any) {
       console.error("Signup network error:", err);
@@ -90,26 +100,46 @@ export default function LoginPage() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/login`, // or your preferred page
-    });
-    if (error) setMessage("Error: " + error.message);
-    else setMessage("Password reset link sent! Check your email.");
-    setLoading(false);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login`,
+      });
+      
+      if (error) {
+        setMessage("Error: " + error.message);
+      } else {
+        setMessage("Password reset link sent! Check your email.");
+      }
+    } catch (err: any) {
+      console.error("Reset request error:", err);
+      setMessage("Network error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) setMessage("Error: " + error.message);
-    else {
-      setMessage("Password updated! You can now log in.");
-      setIsResettingPassword(false);
-      setNewPassword("");
+    
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      
+      if (error) {
+        setMessage("Error: " + error.message);
+      } else {
+        setMessage("Password updated! You can now log in.");
+        setIsResettingPassword(false);
+        setNewPassword("");
+      }
+    } catch (err: any) {
+      console.error("Password update error:", err);
+      setMessage("Network error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const toggleMode = () => {
