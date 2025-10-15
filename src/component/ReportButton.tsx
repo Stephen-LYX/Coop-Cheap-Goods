@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 
 export function ReportButton({ itemID }) {
   const [text, setText] = useState<string>("Report Item");
