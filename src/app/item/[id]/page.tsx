@@ -1,17 +1,23 @@
-//license for heroicons in src/app//item/[id] directory
+//license for heroicons (LICENSE.TXT) in root directory
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
 import Navbar from "@/component/Navbar";
 import Sidebar from "@/component/Sidebar";
+import { ReportButton } from "@/component/ReportButton";
 
-export default async function Item() {
+export default async function Item({
+  params,
+}: {
+  params: Promise<{ id: number }>;
+}) {
+  const { id } = await params;
   try {
     const supabase = await createClient();
     //get item from database
     const { data: item } = await supabase
       .from("items") // select from items table
       .select() // select all columns
-      .eq("id", 1) // where the item id = 1
+      .eq("id", id) // where the item id = id
       .single(); // return data as a single object
     //get item seller username
     const { data: seller } = await supabase
@@ -85,6 +91,7 @@ export default async function Item() {
               >
                 Message Seller
               </a>
+              <ReportButton itemID={id} />
               <hr className="my-4"></hr>
               <p>{item.description}</p>
               <hr className="my-4"></hr>
