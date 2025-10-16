@@ -1,24 +1,33 @@
 //license for heroicons in src/app//item/[id] directory
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import Navbar from "@/component/Navbar";
 import Sidebar from "@/component/Sidebar";
+import { ReportButton } from "@/component/ReportButton";
 
-export default async function Item() {
+export default async function Item({
+  params,
+}: {
+  params: Promise<{ slug: number }>;
+}) {
+  const slug = await params;
+  const item_id = slug.id;
   try {
     const supabase = await createClient();
     //get item from database
     const { data: item } = await supabase
       .from("items") // select from items table
       .select() // select all columns
-      .eq("id", 1) // where the item id = 1
+      .eq("id", item_id) // where the item id = item_id
       .single(); // return data as a single object
     //get item seller username
     const { data: seller } = await supabase
       .from("profiles")
       .select("username") // select the username column
-      .eq("id", item.user_id) // where the profile id = the item id
+      .eq("id", item.user_id) // where the profile id = this item's seller's user id
       .single();
+
     return (
       <main>
         <Navbar />
@@ -62,7 +71,7 @@ export default async function Item() {
                 className="bg-gray-300 mb-4"
               ></Image>
             </div>
-            <div className="flex-1">
+            <div className="flex-auto">
               <Image
                 src={item.image_url}
                 alt={item.title}
@@ -71,7 +80,7 @@ export default async function Item() {
                 className="bg-gray-300"
               ></Image>
             </div>
-            <div className="flex-auto pl-4">
+            <div className="flex-auto pl-4 w-100">
               <h1 className="font-bold text-500 text-2xl">
                 {item.title} - $
                 {item.price.toLocaleString("en-US", {
@@ -79,12 +88,13 @@ export default async function Item() {
                 })}
               </h1>
               <p className="text-xl">Category: {item.category}</p>
-              <a
-                href="http://localhost:3000/inbox"
+              <Link
+                href="/inbox"
                 className="block py-2 my-4 border border-neutral-950 text-center w-auto hover:bg-gray-100 rounded"
               >
                 Message Seller
-              </a>
+              </Link>
+              <ReportButton itemID={item.id} />
               <hr className="my-4"></hr>
               <p>{item.description}</p>
               <hr className="my-4"></hr>
