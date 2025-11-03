@@ -22,6 +22,13 @@ type Conversation = {
   unread_count?: number;
 };
 
+type User = {
+  id: string;
+  username?: string;
+  full_name?: string;
+  // add other relevant properties
+};
+
 type Message = {
   id: string;
   conversation_id: string;
@@ -35,7 +42,7 @@ type Message = {
 };
 
 export default function InboxPage() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth() as { user: User | null; loading: boolean };
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -45,6 +52,7 @@ export default function InboxPage() {
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  
 
   // Wait until AuthContext finished loading (prevents premature redirect)
   useEffect(() => {
@@ -169,7 +177,9 @@ export default function InboxPage() {
   async function sendMessage() {
     if (!newMessage.trim() || !selectedConversation || !user) return;
 
-    const receiverId = selectedConversation.buyer_id === user.id ? selectedConversation.seller_id : selectedConversation.buyer_id;
+    const receiverId = selectedConversation.buyer_id === user.id 
+      ? selectedConversation.seller_id 
+      : selectedConversation.buyer_id;
 
     try {
       const { data, error } = await supabase
@@ -186,7 +196,14 @@ export default function InboxPage() {
 
       if (error) throw error;
 
-      // update conversation
+      // FIXED: Manually add the message to state immediately
+      const newMsg: Message = {
+        ...data,
+        sender_name: user.username || user.full_name || "You",
+      };
+      setMessages((prev) => [...prev, newMsg]);
+
+      // Update conversation
       await supabase
         .from("conversations")
         .update({
@@ -235,66 +252,150 @@ export default function InboxPage() {
     return username.toLowerCase().includes(term) || full.toLowerCase().includes(term) || title.toLowerCase().includes(term);
   });
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (loading) return <div className="flex justify-center items-center h-screen bg-gray-50">Loading...</div>;
 
   return (
-    <div className="h-screen w-screen">
+    <div className="flex flex-col h-screen bg-gray-50">
       <Navbar />
-      <div className="flex h-11/12">
-        {/* Sidebar */}
-        <div className="w-80 bg-[#FFFBDE] flex flex-col">
-          <div className="font-bold text-2xl pt-3 px-3 pb-2 shrink-0">Inbox</div>
-          <div className="mx-3 mb-3 p-2 bg-white flex items-center rounded">
-            <IoIosSearch className="text-gray-500 mr-2" />
-            <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search chats" className="w-full focus:outline-none text-sm" />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar - Conversations List */}
+        <div className="w-96 bg-white border-r-2 border-gray-300 flex flex-col shadow-md">
+          {/* Header */}
+          <div className="px-6 py-5 border-b-2 border-gray-300 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">Messages</h1>
+            
+            {/* Search Bar */}
+            <div className="relative">
+              <IoIosSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+              <input 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                placeholder="Search conversations..." 
+                className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm shadow-sm"
+              />
+            </div>
           </div>
 
+          {/* Conversations List */}
           <div className="flex-1 overflow-y-auto">
             {loadingConversations ? (
-              <div className="p-4 text-center text-gray-500">Loading conversations...</div>
+              <div className="flex items-center justify-center h-32">
+                <div className="text-gray-400 text-sm">Loading conversations...</div>
+              </div>
             ) : filtered.length ? (
-              filtered.map((conv) => (
-                <div key={conv.id} className={`flex items-center p-3 hover:bg-gray-100 cursor-pointer ${selectedConversation?.id === conv.id ? "bg-gray-200" : ""}`} onClick={() => selectConversation(conv)}>
-                  <img src={conv.other_user?.avatar_url ?? "/default-avatar.png"} alt={conv.other_user?.username ?? "User"} className="w-10 h-10 rounded-full mr-3" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm truncate">{conv.other_user?.username ?? conv.other_user?.full_name}</div>
-                    <div className="text-xs text-gray-600 truncate">{conv.last_message ?? "No messages yet"}</div>
-                    {conv.item && <div className="text-xs text-blue-600 truncate">About: {conv.item.title}</div>}
+              <div className="divide-y divide-gray-100">
+                {filtered.map((conv) => (
+                  <div 
+                    key={conv.id} 
+                    className={`flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 ${
+                      selectedConversation?.id === conv.id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"
+                    }`} 
+                    onClick={() => selectConversation(conv)}
+                  >
+                    {/* Avatar */}
+                    <div className="relative flex-shrink-0">
+                      <img 
+                        src={conv.other_user?.avatar_url ?? "/default-avatar.png"} 
+                        alt={conv.other_user?.username ?? "User"} 
+                        className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100"
+                      />
+                      {conv.unread_count && conv.unread_count > 0 && (
+                        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg">
+                          {conv.unread_count}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Conversation Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-semibold text-gray-900 truncate text-sm">
+                          {conv.other_user?.username ?? conv.other_user?.full_name ?? "Unknown User"}
+                        </h3>
+                        {conv.last_message_at && (
+                          <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+                            {new Date(conv.last_message_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <p className="text-sm text-gray-600 truncate mb-1">
+                        {conv.last_message ?? "No messages yet"}
+                      </p>
+                      
+                      {conv.item && (
+                        <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md inline-block">
+                          <span className="truncate">📦 {conv.item.title}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {conv.unread_count && conv.unread_count > 0 && <div className="ml-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{conv.unread_count}</div>}
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
-              <div className="p-4 text-center text-gray-500">No conversations found</div>
+              <div className="flex flex-col items-center justify-center h-32 text-gray-400">
+                <p className="text-sm">No conversations found</p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Chat area */}
-        <div className="flex-1 flex flex-col">
-          <div className="h-16 p-4 bg-gray-50 border-b">
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col bg-gray-50">
+          {/* Chat Header */}
+          <div className="h-20 px-6 bg-white border-b border-gray-200 flex items-center shadow-sm">
             {selectedConversation ? (
-              <div className="flex items-center">
-                <img src={selectedConversation.other_user?.avatar_url ?? "/default-avatar.png"} className="w-8 h-8 rounded-full mr-3" />
+              <div className="flex items-center gap-4">
+                <img 
+                  src={selectedConversation.other_user?.avatar_url ?? "/default-avatar.png"} 
+                  alt="User avatar"
+                  className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
+                />
                 <div>
-                  <div className="font-semibold">{selectedConversation.other_user?.username ?? selectedConversation.other_user?.full_name}</div>
-                  {selectedConversation.item && <div className="text-xs text-gray-500">About: {selectedConversation.item.title}</div>}
+                  <h2 className="font-semibold text-gray-900 text-lg">
+                    {selectedConversation.other_user?.username ?? selectedConversation.other_user?.full_name ?? "Unknown User"}
+                  </h2>
+                  {selectedConversation.item && (
+                    <p className="text-sm text-gray-500">
+                      About: <span className="text-blue-600 font-medium">{selectedConversation.item.title}</span>
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
-              <div className="text-gray-500">Select a chat to start messaging</div>
+              <div className="text-gray-400 text-sm">Select a conversation to start messaging</div>
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 bg-white">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {selectedConversation ? (
-              loadingMessages ? <div className="text-gray-500">Loading messages...</div> : (
+              loadingMessages ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-gray-400 text-sm">Loading messages...</div>
+                </div>
+              ) : (
                 <>
                   {messages.map((m) => (
-                    <div key={m.id} className={`flex ${m.sender_id === user?.id ? "justify-end" : "justify-start"}`}>
-                      <div className={`px-4 py-2 rounded-lg max-w-xs ${m.sender_id === user?.id ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"}`}>
-                        <div className="text-sm">{m.content}</div>
-                        <div className="text-xs mt-1">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                    <div 
+                      key={m.id} 
+                      className={`flex ${m.sender_id === user?.id ? "justify-end" : "justify-start"} mb-4`}
+                    >
+                      <div className={`flex flex-col max-w-md ${m.sender_id === user?.id ? "items-end" : "items-start"}`}>
+                        <div 
+                          className={`px-5 py-3 rounded-2xl shadow-sm ${
+                            m.sender_id === user?.id 
+                              ? "bg-blue-600 text-white rounded-br-sm" 
+                              : "bg-white text-gray-800 border border-gray-200 rounded-bl-sm"
+                          }`}
+                        >
+                          <p className="text-sm leading-relaxed break-words">{m.content}</p>
+                        </div>
+                        <span className={`text-xs mt-1 px-2 ${
+                          m.sender_id === user?.id ? "text-gray-500" : "text-gray-400"
+                        }`}>
+                          {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -302,16 +403,35 @@ export default function InboxPage() {
                 </>
               )
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">Select a conversation to start chatting</div>
+              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <svg className="w-24 h-24 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <p className="text-base font-medium">Select a conversation to start chatting</p>
+                <p className="text-sm mt-1">Choose from your existing conversations or start a new one</p>
+              </div>
             )}
           </div>
 
+          {/* Message Input */}
           {selectedConversation && (
-            <div className="p-4 border-t bg-white">
-              <div className="flex items-center">
-                <input value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={handleKeyDown} placeholder="Type a message..." className="flex-1 px-4 py-2 border rounded-full" />
-                <button onClick={sendMessage} disabled={!newMessage.trim()} className="ml-2 p-2 rounded-full bg-blue-600 text-white">
-                  <IoMdSend />
+            <div className="p-6 bg-white border-t-2 border-gray-300 shadow-lg">
+              <div className="flex items-center gap-3">
+                <input 
+                  value={newMessage} 
+                  onChange={(e) => setNewMessage(e.target.value)} 
+                  onKeyDown={handleKeyDown} 
+                  placeholder="Type your message..." 
+                  className="flex-1 px-5 py-3 bg-white border-2 border-gray-400 rounded-full 
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                            transition-all text-sm text-black placeholder:text-gray-400"
+                />
+                <button 
+                  onClick={sendMessage} 
+                  disabled={!newMessage.trim()} 
+                  className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-lg hover:shadow-xl disabled:shadow-none"
+                >
+                  <IoMdSend className="text-xl" />
                 </button>
               </div>
             </div>
