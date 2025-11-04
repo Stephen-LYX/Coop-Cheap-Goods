@@ -26,7 +26,6 @@ type User = {
   id: string;
   username?: string;
   full_name?: string;
-  // add other relevant properties
 };
 
 type Message = {
@@ -52,30 +51,25 @@ export default function InboxPage() {
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  
 
-  // Wait until AuthContext finished loading (prevents premature redirect)
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/Login"); // match your route casing
+      router.push("/Login");
       return;
     }
     if (user) fetchConversations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading]);
 
   useEffect(() => {
     if (!selectedConversation) return;
     fetchMessages(selectedConversation.id);
     markMessagesAsRead(selectedConversation.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConversation]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Realtime subscription for new messages for the selected conversation
   useEffect(() => {
     if (!selectedConversation) return;
     const channel = supabase
@@ -177,18 +171,21 @@ export default function InboxPage() {
   async function sendMessage() {
     if (!newMessage.trim() || !selectedConversation || !user) return;
 
-    const receiverId = selectedConversation.buyer_id === user.id 
-      ? selectedConversation.seller_id 
-      : selectedConversation.buyer_id;
+    const receiverId =
+      selectedConversation.buyer_id === user.id
+        ? selectedConversation.seller_id
+        : selectedConversation.buyer_id;
 
     try {
+      const messageContent = newMessage.trim();
+
       const { data, error } = await supabase
         .from("messages")
         .insert({
           conversation_id: selectedConversation.id,
           sender_id: user.id,
           receiver_id: receiverId,
-          content: newMessage.trim(),
+          content: messageContent,
           message_type: "text",
         })
         .select()
@@ -196,25 +193,23 @@ export default function InboxPage() {
 
       if (error) throw error;
 
-      // FIXED: Manually add the message to state immediately
       const newMsg: Message = {
         ...data,
         sender_name: user.username || user.full_name || "You",
       };
       setMessages((prev) => [...prev, newMsg]);
 
-      // Update conversation
       await supabase
         .from("conversations")
         .update({
-          last_message: newMessage.trim(),
+          last_message: messageContent,
           last_message_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("id", selectedConversation.id);
 
       setNewMessage("");
-      fetchConversations(); // refresh overview
+      fetchConversations();
     } catch (err) {
       console.error("Error sending message:", err);
     }
@@ -223,7 +218,12 @@ export default function InboxPage() {
   async function markMessagesAsRead(conversationId: string) {
     if (!user) return;
     try {
-      await supabase.from("messages").update({ is_read: true }).eq("conversation_id", conversationId).eq("receiver_id", user.id).eq("is_read", false);
+      await supabase
+        .from("messages")
+        .update({ is_read: true })
+        .eq("conversation_id", conversationId)
+        .eq("receiver_id", user.id)
+        .eq("is_read", false);
     } catch (err) {
       console.error("Error marking messages as read:", err);
     }
@@ -260,23 +260,20 @@ export default function InboxPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Conversations List */}
         <div className="w-96 bg-white border-r-2 border-gray-300 flex flex-col shadow-md">
-          {/* Header */}
           <div className="px-6 py-5 border-b-2 border-gray-300 bg-gradient-to-r from-blue-50 to-indigo-50">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">Messages</h1>
             
-            {/* Search Bar */}
             <div className="relative">
-              <IoIosSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+              <IoIosSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black text-xl" />
               <input 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)} 
                 placeholder="Search conversations..." 
-                className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm shadow-sm"
+                className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-black shadow-sm"
               />
             </div>
           </div>
 
-          {/* Conversations List */}
           <div className="flex-1 overflow-y-auto">
             {loadingConversations ? (
               <div className="flex items-center justify-center h-32">
@@ -292,7 +289,6 @@ export default function InboxPage() {
                     }`} 
                     onClick={() => selectConversation(conv)}
                   >
-                    {/* Avatar */}
                     <div className="relative flex-shrink-0">
                       <img 
                         src={conv.other_user?.avatar_url ?? "/default-avatar.png"} 
@@ -306,7 +302,6 @@ export default function InboxPage() {
                       )}
                     </div>
                     
-                    {/* Conversation Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="font-semibold text-gray-900 truncate text-sm">
@@ -342,7 +337,6 @@ export default function InboxPage() {
 
         {/* Chat Area */}
         <div className="flex-1 flex flex-col bg-gray-50">
-          {/* Chat Header */}
           <div className="h-20 px-6 bg-white border-b border-gray-200 flex items-center shadow-sm">
             {selectedConversation ? (
               <div className="flex items-center gap-4">
@@ -367,12 +361,11 @@ export default function InboxPage() {
             )}
           </div>
 
-          {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {selectedConversation ? (
               loadingMessages ? (
                 <div className="flex items-center justify-center h-full">
-                  <div className="text-gray-400 text-sm">Loading messages...</div>
+                  <div className="text-black text-sm">Loading messages...</div>
                 </div>
               ) : (
                 <>
@@ -386,7 +379,7 @@ export default function InboxPage() {
                           className={`px-5 py-3 rounded-2xl shadow-sm ${
                             m.sender_id === user?.id 
                               ? "bg-blue-600 text-white rounded-br-sm" 
-                              : "bg-white text-gray-800 border border-gray-200 rounded-bl-sm"
+                              : "bg-white text-black border border-gray-200 rounded-bl-sm"
                           }`}
                         >
                           <p className="text-sm leading-relaxed break-words">{m.content}</p>
@@ -413,7 +406,6 @@ export default function InboxPage() {
             )}
           </div>
 
-          {/* Message Input */}
           {selectedConversation && (
             <div className="p-6 bg-white border-t-2 border-gray-300 shadow-lg">
               <div className="flex items-center gap-3">
