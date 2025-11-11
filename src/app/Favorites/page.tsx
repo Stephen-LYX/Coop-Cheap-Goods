@@ -19,7 +19,6 @@ export default function Favorites() {
     <main className="">
       <Navbar />
         <div className="flex min-h-screen">
-          <Sidebar />
             <div className="w-full h-full">
               <h1 className="font-bold text-blue-500 text-2xl p-8">
                 Your Favorites

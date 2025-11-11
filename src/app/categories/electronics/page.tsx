@@ -11,7 +11,7 @@ export default function Home() {
         <CategoryBar />
         <div className="px-4 py-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Electronics</h1>
-            <MarketplaceGrid category="electronics" />
+            <MarketplaceGrid category="Electronics" />
         </div>
     </main>
   );

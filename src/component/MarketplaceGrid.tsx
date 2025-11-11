@@ -5,12 +5,13 @@ import Image from "next/image"
 import ItemCard from "./ItemCard"
 import { useSearchContext } from "../contexts/SearchContext"
 import { createClient } from "@/utils/supabase/client"
+import { ClothingFilterState } from "./ClothingFilters"
 
 interface MarketplaceGridProps {
   category?: string
+  clothingFilters?: ClothingFilterState
 }
 
-// Define the Item interface to match your Supabase table structure
 interface Item {
   id: number
   title: string
@@ -20,18 +21,20 @@ interface Item {
   category: string
   image_path: string | null
   image_url: string | null
+  brand?: string | null
+  size?: string | null
+  color?: string | null
   created_at?: string
   user_id?: string
 }
 
-const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
+const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) => {
   const { searchQuery } = useSearchContext()
   const [items, setItems] = useState<Item[]>([])
   const [sortBy, setSortBy] = useState('newest')
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  // Fetch items from Supabase
   const fetchItems = async () => {
     setLoading(true)
     try {
@@ -39,12 +42,33 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
         .from("items")
         .select("*")
 
-      // Filter by category if provided
       if (category) {
         query = query.eq('category', category)
       }
 
-      // Apply sorting
+      // Apply clothing filters if provided
+      if (clothingFilters) {
+        if (clothingFilters.brands.length > 0) {
+          query = query.in('brand', clothingFilters.brands)
+        }
+        if (clothingFilters.sizes.length > 0) {
+          query = query.in('size', clothingFilters.sizes)
+        }
+        if (clothingFilters.colors.length > 0) {
+          query = query.in('color', clothingFilters.colors)
+        }
+        if (clothingFilters.conditions.length > 0) {
+          query = query.in('condition', clothingFilters.conditions)
+        }
+        if (clothingFilters.priceRange) {
+          query = query
+            .gte('price', clothingFilters.priceRange.min)
+          if (clothingFilters.priceRange.max !== Infinity) {
+            query = query.lte('price', clothingFilters.priceRange.max)
+          }
+        }
+      }
+
       switch (sortBy) {
         case 'price-low':
           query = query.order('price', { ascending: true })
@@ -74,12 +98,10 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
     }
   }
 
-  // Load items on mount and when sort or category changes
   useEffect(() => {
     fetchItems()
-  }, [sortBy, category])
+  }, [sortBy, category, clothingFilters])
 
-  // Filter items based on search query (client-side filtering)
   const filteredItems = items.filter(item => {
     if (!searchQuery.trim()) return true
     
@@ -88,13 +110,14 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
       item.title?.toLowerCase().includes(query) ||
       item.condition?.toLowerCase().includes(query) ||
       item.description?.toLowerCase().includes(query) ||
-      item.category?.toLowerCase().includes(query)
+      item.category?.toLowerCase().includes(query) ||
+      item.brand?.toLowerCase().includes(query) ||
+      item.color?.toLowerCase().includes(query)
     )
   })
 
   return (
-    <div className="px-6 py-4 max-w-7xl mx-auto">
-      {/* Header with results count and sort */}
+    <div className="px-3 py-4 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           {searchQuery.trim() && (
@@ -109,7 +132,6 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
           )}
         </div>
         
-        {/* Sort Dropdown */}
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -121,14 +143,12 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
         </select>
       </div>
 
-      {/* Loading State */}
       {loading ? (
         <div className="flex justify-center items-center py-12">
           <div className="text-gray-600 text-lg">Loading...</div>
         </div>
       ) : (
         <>
-          {/* No Results Message */}
           {filteredItems.length === 0 && searchQuery.trim() && (
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
@@ -143,25 +163,23 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
             </div>
           )}
 
-          {/* No Items in Database */}
           {filteredItems.length === 0 && !searchQuery.trim() && (
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
                 <p className="text-gray-600 mb-4">
                   {category 
-                    ? `There are currently no items in the ${category} category.`
-                    : "There are currently no items."
+                    ? `There are currently no items in the ${category} category matching your filters.`
+                    : "There are currently no items matching your filters."
                   }
                 </p>
               </div>
             </div>
           )}
 
-          {/* Items Grid */}
           {filteredItems.length > 0 && (
             <>
-              <div className="w-full px-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="w-full px-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {filteredItems.map((item) => (
                     <ItemCard 
                       key={item.id} 
@@ -177,7 +195,6 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
                 </div>
               </div>
 
-              {/* Load More Button - Only show if we're displaying all items (no search) */}
               {!searchQuery.trim() && (
                 <div className="flex justify-center mt-8">
                   <button 

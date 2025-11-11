@@ -1,58 +1,6 @@
 "use client"
 
-import Link from "next/link"
 import { useState } from "react"
-import type { ReactElement } from "react"
-
-// Icon components for different categories
-const ClothingIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-)
-
-const FurnitureIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 21v-4a2 2 0 012-2h2a2 2 0 012 2v4" />
-  </svg>
-)
-
-const ElectronicsIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  </svg>
-)
-
-const BooksIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-  </svg>
-)
-
-const SportsIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 13v-1m4 1v-3m4 3V8M8 21l4-7 4 7M3 4h18M4 4h16v6a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-  </svg>
-)
-
-const HomeGardenIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-  </svg>
-)
-
-const BeautyIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-)
-
-const ToysIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1a3 3 0 000-6h-1m4 6h1a3 3 0 000-6h-1m-2 8v2a3 3 0 01-6 0v-2m12 0v2a3 3 0 01-6 0v-2" />
-  </svg>
-)
 
 const ChevronLeftIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,138 +14,327 @@ const ChevronRightIcon = () => (
   </svg>
 )
 
-// Define the icon type
-type IconName = 'clothing' | 'furniture' | 'electronics' | 'books' | 'sports' | 'home-garden' | 'beauty' | 'toys';
+const ChevronDownIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+  </svg>
+)
 
-// Define the category interface
-interface Category {
-  key: string;
-  label: string;
-  href: string;
-  icon: IconName;
-}
+const ChevronUpIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+  </svg>
+)
 
-// Categories data
-const CATEGORIES: Category[] = [
-  {
-    key: 'clothing',
-    label: 'Clothing',
-    href: '/categories/clothing',
-    icon: 'clothing'
-  },
-  {
-    key: 'furniture',
-    label: 'Furniture',
-    href: '/categories/furniture',
-    icon: 'furniture'
-  },
-  {
-    key: 'electronics',
-    label: 'Electronics',
-    href: '/categories/electronics',
-    icon: 'electronics'
-  },
-  {
-    key: 'books',
-    label: 'Books',
-    href: '/categories/books',
-    icon: 'books'
-  },
-  {
-    key: 'sports',
-    label: 'Sports & Outdoors',
-    href: '/categories/sports',
-    icon: 'sports'
-  },
-  {
-    key: 'home-garden',
-    label: 'Home & Garden',
-    href: '/categories/home-garden',
-    icon: 'home-garden'
-  },
-  {
-    key: 'beauty',
-    label: 'Beauty & Health',
-    href: '/categories/beauty',
-    icon: 'beauty'
-  },
-  {
-    key: 'toys',
-    label: 'Toys & Games',
-    href: '/categories/toys',
-    icon: 'toys'
-  }
-]
+const FilterIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+  </svg>
+)
 
-// Type the getIcon function properly
-const getIcon = (iconName: IconName): ReactElement | null => {
-  const icons: Record<IconName, ReactElement> = {
-    clothing: <ClothingIcon />,
-    furniture: <FurnitureIcon />,
-    electronics: <ElectronicsIcon />,
-    books: <BooksIcon />,
-    sports: <SportsIcon />,
-    'home-garden': <HomeGardenIcon />,
-    beauty: <BeautyIcon />,
-    toys: <ToysIcon />
-  }
-  return icons[iconName] || null
-}
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+const CONDITIONS = ['New', 'Like New', 'Good', 'Fair']
 
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [priceRange, setPriceRange] = useState([0, 1000])
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([])
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([])
+  const [expandedSections, setExpandedSections] = useState({
+    price: true,
+    size: true,
+    condition: true
+  })
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+  }
+
+  const toggleSize = (size: string) => {
+    setSelectedSizes(prev =>
+      prev.includes(size)
+        ? prev.filter(s => s !== size)
+        : [...prev, size]
+    )
+  }
+
+  const toggleCondition = (condition: string) => {
+    setSelectedConditions(prev =>
+      prev.includes(condition)
+        ? prev.filter(c => c !== condition)
+        : [...prev, condition]
+    )
+  }
+
+  const clearFilters = () => {
+    setPriceRange([0, 1000])
+    setSelectedSizes([])
+    setSelectedConditions([])
+  }
+
+  const hasActiveFilters = 
+    priceRange[0] !== 0 || 
+    priceRange[1] !== 1000 || 
+    selectedSizes.length > 0 || 
+    selectedConditions.length > 0
 
   return (
-    <div className={`bg-[#FFFBDE] border-r border-gray-200 shadow-sm transition-all duration-300 h-screen ${
+    <div className={`bg-white border-r border-gray-200 shadow-sm transition-all duration-300 h-screen overflow-y-auto ${
       isCollapsed ? 'w-16' : 'w-64'
     } flex-shrink-0`}>
       
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
-          {!isCollapsed && (
-            <span className="text-lg font-semibold text-gray-800">
-              Categories
-            </span>
-          )}
+      <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4">
+          <div className={`flex items-center gap-2 ${isCollapsed ? 'justify-center' : ''}`}>
+            {!isCollapsed ? (
+              <>
+                <FilterIcon />
+                <span className="text-lg font-semibold text-gray-800">Filters</span>
+              </>
+            ) : (
+              <FilterIcon />
+            )}
+          </div>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-200"
+          >
+            {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </button>
         </div>
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-200"
-        >
-          {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-        </button>
+
+        {/* Clear Filters Button */}
+        {!isCollapsed && hasActiveFilters && (
+          <div className="px-4 pb-3">
+            <button
+              onClick={clearFilters}
+              className="w-full px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors duration-200 border border-blue-200"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Categories Navigation */}
-      <nav className="p-4">
-        <div className="space-y-2">
-          {CATEGORIES.map((category) => (
-            <Link
-              key={category.key}
-              href={category.href}
-              className={`flex items-center space-x-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors duration-200 text-gray-700 hover:text-gray-900 hover:bg-gray-100 group ${
-                isCollapsed ? 'justify-center' : ''
-              }`}
+      {/* Filters */}
+      {!isCollapsed && (
+        <div className="p-4 space-y-6">
+          
+          {/* Price Range Filter */}
+          <div className="space-y-3">
+            <button
+              onClick={() => toggleSection('price')}
+              className="flex items-center justify-between w-full text-sm font-semibold text-gray-800 hover:text-gray-900"
             >
-              <div className="flex-shrink-0">
-                {getIcon(category.icon)}
-              </div>
-              
-              {!isCollapsed && (
-                <span className="flex-1">{category.label}</span>
-              )}
-              
-              {/* Tooltip for collapsed state */}
-              {isCollapsed && (
-                <div className="absolute left-16 bg-gray-900 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
-                  {category.label}
+              <span>Price Range</span>
+              {expandedSections.price ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            </button>
+            
+            {expandedSections.price && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs text-gray-600">
+                  <span>${priceRange[0]}</span>
+                  <span>${priceRange[1]}</span>
                 </div>
-              )}
-            </Link>
-          ))}
+                
+                <div className="relative h-6 flex items-center">
+                  {/* Track background */}
+                  <div className="absolute w-full h-2 bg-gray-200 rounded-lg"></div>
+                  
+                  {/* Active range */}
+                  <div 
+                    className="absolute h-2 bg-blue-600 rounded-lg pointer-events-none"
+                    style={{
+                      left: `${(priceRange[0] / 1000) * 100}%`,
+                      right: `${100 - (priceRange[1] / 1000) * 100}%`
+                    }}
+                  ></div>
+                  
+                  {/* Max range input - higher z-index when both at same position */}
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    step="10"
+                    value={priceRange[1]}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value)
+                      if (value > priceRange[0]) {
+                        setPriceRange([priceRange[0], value])
+                      }
+                    }}
+                    className="absolute w-full appearance-none bg-transparent cursor-pointer slider-max"
+                    style={{
+                      height: '0px',
+                      outline: 'none',
+                      zIndex: priceRange[1] - priceRange[0] <= 0 ? 5 : 3
+                    }}
+                  />
+                  
+                  {/* Min range input */}
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    step="10"
+                    value={priceRange[0]}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value)
+                      if (value < priceRange[1]) {
+                        setPriceRange([value, priceRange[1]])
+                      }
+                    }}
+                    className="absolute w-full appearance-none bg-transparent cursor-pointer slider-min"
+                    style={{
+                      height: '0px',
+                      outline: 'none',
+                      zIndex: priceRange[1] - priceRange[0] <= 0 ? 4 : 5
+                    }}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 mt-4">
+                  <input
+                    type="number"
+                    value={priceRange[0]}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 0
+                      if (value < priceRange[1] && value >= 0) {
+                        setPriceRange([value, priceRange[1]])
+                      }
+                    }}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Min"
+                  />
+                  <span className="text-gray-500">-</span>
+                  <input
+                    type="number"
+                    value={priceRange[1]}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 1000
+                      if (value > priceRange[0] && value <= 1000) {
+                        setPriceRange([priceRange[0], value])
+                      }
+                    }}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Max"
+                  />
+                </div>
+
+                <style jsx>{`
+                  input[type="range"]::-webkit-slider-thumb {
+                    appearance: none;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    background: #2563eb;
+                    cursor: pointer;
+                    border: 2px solid white;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+                    pointer-events: all;
+                    margin-top: -8px;
+                  }
+                  
+                  input[type="range"]::-moz-range-thumb {
+                    appearance: none;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    background: #2563eb;
+                    cursor: pointer;
+                    border: 2px solid white;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+                    pointer-events: all;
+                  }
+                  
+                  input[type="range"]::-webkit-slider-runnable-track {
+                    width: 100%;
+                    height: 0px;
+                    cursor: pointer;
+                  }
+                  
+                  input[type="range"]::-moz-range-track {
+                    width: 100%;
+                    height: 0px;
+                    cursor: pointer;
+                  }
+                `}</style>
+              </div>
+            )}
+          </div>
+
+          {/* Size Filter */}
+          <div className="space-y-3">
+            <button
+              onClick={() => toggleSection('size')}
+              className="flex items-center justify-between w-full text-sm font-semibold text-gray-800 hover:text-gray-900"
+            >
+              <span>Size</span>
+              {expandedSections.size ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            </button>
+            
+            {expandedSections.size && (
+              <div className="grid grid-cols-3 gap-2">
+                {SIZES.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => toggleSize(size)}
+                    className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors duration-200 ${
+                      selectedSizes.includes(size)
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Condition Filter */}
+          <div className="space-y-3">
+            <button
+              onClick={() => toggleSection('condition')}
+              className="flex items-center justify-between w-full text-sm font-semibold text-gray-800 hover:text-gray-900"
+            >
+              <span>Condition</span>
+              {expandedSections.condition ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            </button>
+            
+            {expandedSections.condition && (
+              <div className="space-y-2">
+                {CONDITIONS.map((condition) => (
+                  <label
+                    key={condition}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedConditions.includes(condition)}
+                      onChange={() => toggleCondition(condition)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-700">{condition}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
         </div>
-      </nav>
+      )}
+
+      {/* Collapsed State Indicator */}
+      {isCollapsed && hasActiveFilters && (
+        <div className="flex justify-center mt-4">
+          <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+        </div>
+      )}
     </div>
   )
 }

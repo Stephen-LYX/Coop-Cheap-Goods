@@ -30,7 +30,9 @@ const BooksIcon = () => (
 
 const SportsIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 13v-1m4 1v-3m4 3V8M8 21l4-7 4 7M3 4h18M4 4h16v6a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+    <circle cx="5.5" cy="17.5" r="2.5" strokeWidth={2} />
+    <circle cx="18.5" cy="17.5" r="2.5" strokeWidth={2} />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 6a1 1 0 100-2 1 1 0 000 2zM12 17.5l-3.5-7 5-1 1.5 2.5M8 12l5 5.5M12 8.5L15.5 15" />
   </svg>
 )
 
@@ -48,7 +50,7 @@ const BeautyIcon = () => (
 
 const ToysIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1a3 3 0 000-6h-1m4 6h1a3 3 0 000-6h-1m-2 8v2a3 3 0 01-6 0v-2m12 0v2a3 3 0 01-6 0v-2" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 )
 
@@ -130,7 +132,7 @@ const CategoryBar = () => {
   return (
     <div className="bg-[#ffffff] border-gray-200 sticky top-16 z-40">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-left overflow-x-auto py-1">
+        <nav className="flex items-center justify-center overflow-x-auto py-1">
           <div className="flex space-x-1">
             {CATEGORIES.map((category) => (
               <Link
