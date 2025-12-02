@@ -1,13 +1,16 @@
 /*
 Title: Report Button component
 Author: Miles Paleveda
-Date: 10/28/2025
+Date: 11/13/2025
 
 Credits: This file includes the following third party and open source softwares:
   -Next.js: license in /credits/nextjs/LICENSE
   -React: license in /credits/react/LICENSE
   -Supabase: license in /credits/supabase/LICENSE
   -Tailwind CSS: license in /credits/tailwindcss/LICENSE
+  -Flowbite: license in /credits/flowbite/LICENSE
+  -Flowbite Icons: license in /credits/flowbite-icons/LICENSE
+  -Flowbite docs code: attribution in /credits/flowbite docs code/attribution.txt
 */
 
 "use client";
