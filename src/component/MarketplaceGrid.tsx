@@ -1,123 +1,93 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import ItemCard from "./ItemCard"
-import { useSearchContext } from "../contexts/SearchContext"
-import { createClient } from "@/utils/supabase/client"
-import { ClothingFilterState } from "./ClothingFilters"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import ItemCard from "./ItemCard";
+import { useSearchContext } from "../contexts/SearchContext";
+import { createClient } from "@/utils/supabase/client";  // ✅ Updated client import
 
 interface MarketplaceGridProps {
-  category?: string
-  clothingFilters?: ClothingFilterState
+  category?: string;
 }
 
 interface Item {
-  id: number
-  title: string
-  description: string | null
-  price: number
-  condition: string
-  category: string
-  image_path: string | null
-  image_url: string | null
-  brand?: string | null
-  size?: string | null
-  color?: string | null
-  created_at?: string
-  user_id?: string
+  id: number;
+  title: string;
+  description: string | null;
+  price: number;
+  condition: string;
+  category: string;
+  image_path: string | null;
+  image_url: string | null;
+  created_at?: string;
+  user_id?: string;
 }
 
-const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) => {
-  const { searchQuery } = useSearchContext()
-  const [items, setItems] = useState<Item[]>([])
-  const [sortBy, setSortBy] = useState('newest')
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
+  const { searchQuery } = useSearchContext();
+  const [items, setItems] = useState<Item[]>([]);
+  const [sortBy, setSortBy] = useState("newest");
+  const [loading, setLoading] = useState(true);
+
+  const supabase = createClient(); // ✅ Now uses the session-aware browser client
 
   const fetchItems = async () => {
-    setLoading(true)
+    setLoading(true);
+
     try {
-      let query = supabase
-        .from("items")
-        .select("*")
+      let query = supabase.from("items").select("*");
 
       if (category) {
-        query = query.eq('category', category)
-      }
-
-      // Apply clothing filters if provided
-      if (clothingFilters) {
-        if (clothingFilters.brands.length > 0) {
-          query = query.in('brand', clothingFilters.brands)
-        }
-        if (clothingFilters.sizes.length > 0) {
-          query = query.in('size', clothingFilters.sizes)
-        }
-        if (clothingFilters.colors.length > 0) {
-          query = query.in('color', clothingFilters.colors)
-        }
-        if (clothingFilters.conditions.length > 0) {
-          query = query.in('condition', clothingFilters.conditions)
-        }
-        if (clothingFilters.priceRange) {
-          query = query
-            .gte('price', clothingFilters.priceRange.min)
-          if (clothingFilters.priceRange.max !== Infinity) {
-            query = query.lte('price', clothingFilters.priceRange.max)
-          }
-        }
+        query = query.eq("category", category);
       }
 
       switch (sortBy) {
-        case 'price-low':
-          query = query.order('price', { ascending: true })
-          break
-        case 'price-high':
-          query = query.order('price', { ascending: false })
-          break
-        case 'newest':
+        case "price-low":
+          query = query.order("price", { ascending: true });
+          break;
+        case "price-high":
+          query = query.order("price", { ascending: false });
+          break;
+        case "newest":
         default:
-          query = query.order('id', { ascending: false })
-          break
+          query = query.order("id", { ascending: false });
+          break;
       }
 
-      const { data, error } = await query
+      const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching items:", error)
-        setItems([])
+        console.error("Error fetching items:", error);
+        setItems([]);
       } else {
-        setItems(data ?? [])
+        setItems(data ?? []);
       }
     } catch (err) {
-      console.error("Unexpected error:", err)
-      setItems([])
+      console.error("Unexpected error:", err);
+      setItems([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchItems()
-  }, [sortBy, category, clothingFilters])
+    fetchItems();
+  }, [sortBy, category]);
 
-  const filteredItems = items.filter(item => {
-    if (!searchQuery.trim()) return true
-    
-    const query = searchQuery.toLowerCase().trim()
+  const filteredItems = items.filter((item) => {
+    if (!searchQuery.trim()) return true;
+
+    const q = searchQuery.toLowerCase();
     return (
-      item.title?.toLowerCase().includes(query) ||
-      item.condition?.toLowerCase().includes(query) ||
-      item.description?.toLowerCase().includes(query) ||
-      item.category?.toLowerCase().includes(query) ||
-      item.brand?.toLowerCase().includes(query) ||
-      item.color?.toLowerCase().includes(query)
-    )
-  })
+      item.title?.toLowerCase().includes(q) ||
+      item.condition?.toLowerCase().includes(q) ||
+      item.description?.toLowerCase().includes(q) ||
+      item.category?.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="px-3 py-4 max-w-7xl mx-auto">
+    <div className="px-6 py-4 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           {searchQuery.trim() && (
@@ -131,7 +101,7 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
             </>
           )}
         </div>
-        
+
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -152,12 +122,25 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
           {filteredItems.length === 0 && searchQuery.trim() && (
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
-                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No items found
+                </h3>
                 <p className="text-gray-600 mb-4">
-                  We couldn't find any items matching "{searchQuery}". Try different search terms.
+                  We couldn't find any items matching "{searchQuery}". Try
+                  different search terms.
                 </p>
               </div>
             </div>
@@ -167,10 +150,9 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
                 <p className="text-gray-600 mb-4">
-                  {category 
-                    ? `There are currently no items in the ${category} category matching your filters.`
-                    : "There are currently no items matching your filters."
-                  }
+                  {category
+                    ? `There are currently no items in the ${category} category.`
+                    : "There are currently no items."}
                 </p>
               </div>
             </div>
@@ -178,18 +160,18 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
 
           {filteredItems.length > 0 && (
             <>
-              <div className="w-full px-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <div className="w-full px-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   {filteredItems.map((item) => (
-                    <ItemCard 
-                      key={item.id} 
+                    <ItemCard
+                      key={item.id}
                       item={{
                         id: item.id,
                         name: item.title,
-                        image: item.image_url || '',
+                        image: item.image_url || "",
                         condition: item.condition,
-                        price: item.price
-                      }} 
+                        price: item.price,
+                      }}
                     />
                   ))}
                 </div>
@@ -197,7 +179,7 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
 
               {!searchQuery.trim() && (
                 <div className="flex justify-center mt-8">
-                  <button 
+                  <button
                     onClick={fetchItems}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200"
                   >
@@ -210,7 +192,7 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default MarketplaceGrid
+export default MarketplaceGrid;
