@@ -1,6 +1,7 @@
 "use client"
 
 import { ItemProvider } from '../contexts/ItemContext'
+import { EncryptionProvider } from '../contexts/EncryptionContext'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -8,8 +9,10 @@ interface ProvidersProps {
 
 export default function Providers({ children }: ProvidersProps) {
   return (
-    <ItemProvider>
-      {children}
-    </ItemProvider>
+    <EncryptionProvider>
+      <ItemProvider>
+        {children}
+      </ItemProvider>
+    </EncryptionProvider>
   )
 }

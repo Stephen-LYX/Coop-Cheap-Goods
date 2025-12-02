@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import supabase from "@/lib/supabaseClient";
 import Navbar from "@/component/Navbar";
 import { IoIosSearch, IoMdSend } from "react-icons/io";
+import { encryptMessage, decryptMessage } from "@/lib/encryption";
+import { ensureConversationKey } from "@/lib/keyManagement";
 
 type Conversation = {
   id: string;
@@ -155,10 +157,44 @@ export default function InboxPage() {
 
       if (error) throw error;
 
-      const mapped: Message[] = (data || []).map((m: any) => ({
-        ...m,
-        sender_name: m.sender?.username || m.sender?.full_name || "Unknown",
-      }));
+      // Get encryption key for this conversation
+      const conversation = conversations.find(c => c.id === conversationId);
+      if (!conversation || !user) {
+        setMessages([]);
+        return;
+      }
+
+      const otherUserId = conversation.buyer_id === user.id 
+        ? conversation.seller_id 
+        : conversation.buyer_id;
+      
+      const encryptionKey = await ensureConversationKey(
+        conversationId, 
+        user.id, 
+        otherUserId
+      );
+
+      // Decrypt messages
+      const mapped: Message[] = await Promise.all(
+        (data || []).map(async (m: any) => {
+          let decryptedContent = m.content;
+          
+          // Try to decrypt the message
+          try {
+            decryptedContent = await decryptMessage(m.content, encryptionKey);
+          } catch (err) {
+            // If decryption fails, it might be a plain text message (migration scenario)
+            console.warn('Could not decrypt message, using plain text:', err);
+            decryptedContent = m.content;
+          }
+
+          return {
+            ...m,
+            content: decryptedContent,
+            sender_name: m.sender?.username || m.sender?.full_name || "Unknown",
+          };
+        })
+      );
 
       setMessages(mapped);
     } catch (err) {
@@ -179,13 +215,23 @@ export default function InboxPage() {
     try {
       const messageContent = newMessage.trim();
 
+      // Get encryption key for this conversation
+      const encryptionKey = await ensureConversationKey(
+        selectedConversation.id,
+        user.id,
+        receiverId
+      );
+
+      // Encrypt the message before sending
+      const encryptedContent = await encryptMessage(messageContent, encryptionKey);
+
       const { data, error } = await supabase
         .from("messages")
         .insert({
           conversation_id: selectedConversation.id,
           sender_id: user.id,
           receiver_id: receiverId,
-          content: messageContent,
+          content: encryptedContent, // Store encrypted content
           message_type: "text",
         })
         .select()
@@ -193,8 +239,10 @@ export default function InboxPage() {
 
       if (error) throw error;
 
+      // Add decrypted message to local state
       const newMsg: Message = {
         ...data,
+        content: messageContent, // Display decrypted content
         sender_name: user.username || user.full_name || "You",
       };
       setMessages((prev) => [...prev, newMsg]);
@@ -202,7 +250,7 @@ export default function InboxPage() {
       await supabase
         .from("conversations")
         .update({
-          last_message: messageContent,
+          last_message: messageContent, // Store preview as plain text for UI
           last_message_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -319,7 +367,7 @@ export default function InboxPage() {
                       </p>
                       
                       {conv.item && (
-                        <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md inline-block">
+                        <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
                           <span className="truncate">📦 {conv.item.title}</span>
                         </div>
                       )}
