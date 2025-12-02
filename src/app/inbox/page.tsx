@@ -6,9 +6,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import supabase from "@/lib/supabaseClient";
 import Navbar from "@/component/Navbar";
-import { IoIosSearch, IoMdSend } from "react-icons/io";
+import { IoIosSearch, IoMdSend, IoMdCalendar } from "react-icons/io";
 import { encryptMessage, decryptMessage } from "@/lib/encryption";
 import { ensureConversationKey } from "@/lib/keyManagement";
+import MeetingScheduler from "@/component/MeetingScheduler";
+import NotificationModal from "@/component/NotificationModal";
 
 type Conversation = {
   id: string;
@@ -42,6 +44,20 @@ type Message = {
   sender_name?: string;
 };
 
+type TransactionNotification = {
+  id: string;
+  meeting_schedule_id?: string;
+  conversation_id: string;
+  item_id?: number;
+  seller_id: string;
+  buyer_id: string;
+  notification_type: string;
+  status: "pending" | "item_sold" | "item_available" | "dismissed";
+  scheduled_for: string;
+  item?: { title?: string; id: number };
+  buyer?: { username?: string; full_name?: string };
+};
+
 export default function InboxPage() {
   const { user, loading } = useAuth() as { user: User | null; loading: boolean };
   const router = useRouter();
@@ -52,6 +68,8 @@ export default function InboxPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [showScheduler, setShowScheduler] = useState(false);
+  const [pendingNotification, setPendingNotification] = useState<TransactionNotification | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -59,7 +77,10 @@ export default function InboxPage() {
       router.push("/Login");
       return;
     }
-    if (user) fetchConversations();
+    if (user) {
+      fetchConversations();
+      checkPendingNotifications();
+    }
   }, [user, loading]);
 
   useEffect(() => {
@@ -281,6 +302,41 @@ export default function InboxPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
+  async function checkPendingNotifications() {
+    if (!user) return;
+
+    try {
+      const now = new Date().toISOString();
+      
+      const { data, error } = await supabase
+        .from("transaction_notifications")
+        .select(`
+          *,
+          item:items(id, title),
+          buyer:profiles!buyer_id(username, full_name)
+        `)
+        .eq("seller_id", user.id)
+        .eq("status", "pending")
+        .lte("scheduled_for", now)
+        .order("scheduled_for", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (error) {
+        if (error.code !== "PGRST116") { // Not "no rows" error
+          console.error("Error checking notifications:", error);
+        }
+        return;
+      }
+
+      if (data) {
+        setPendingNotification(data as TransactionNotification);
+      }
+    } catch (err) {
+      console.error("Error in checkPendingNotifications:", err);
+    }
+  }
+
   function selectConversation(conv: Conversation) {
     setSelectedConversation(conv);
   }
@@ -305,6 +361,18 @@ export default function InboxPage() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <Navbar />
+
+      {/* Notification Modal */}
+      {pendingNotification && (
+        <NotificationModal
+          notification={pendingNotification}
+          onClose={() => {
+            setPendingNotification(null);
+            checkPendingNotifications(); // Check for next notification
+          }}
+        />
+      )}
+
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Conversations List */}
         <div className="w-96 bg-white border-r-2 border-gray-300 flex flex-col shadow-md">
@@ -385,25 +453,38 @@ export default function InboxPage() {
 
         {/* Chat Area */}
         <div className="flex-1 flex flex-col bg-gray-50">
-          <div className="h-20 px-6 bg-white border-b border-gray-200 flex items-center shadow-sm">
+          <div className="h-20 px-6 bg-white border-b border-gray-200 flex items-center justify-between shadow-sm">
             {selectedConversation ? (
-              <div className="flex items-center gap-4">
-                <img 
-                  src={selectedConversation.other_user?.avatar_url ?? "/default-avatar.png"} 
-                  alt="User avatar"
-                  className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
-                />
-                <div>
-                  <h2 className="font-semibold text-gray-900 text-lg">
-                    {selectedConversation.other_user?.username ?? selectedConversation.other_user?.full_name ?? "Unknown User"}
-                  </h2>
-                  {selectedConversation.item && (
-                    <p className="text-sm text-gray-500">
-                      About: <span className="text-blue-600 font-medium">{selectedConversation.item.title}</span>
-                    </p>
-                  )}
+              <>
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={selectedConversation.other_user?.avatar_url ?? "/default-avatar.png"} 
+                    alt="User avatar"
+                    className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
+                  />
+                  <div>
+                    <h2 className="font-semibold text-gray-900 text-lg">
+                      {selectedConversation.other_user?.username ?? selectedConversation.other_user?.full_name ?? "Unknown User"}
+                    </h2>
+                    {selectedConversation.item && (
+                      <p className="text-sm text-gray-500">
+                        About: <span className="text-blue-600 font-medium">{selectedConversation.item.title}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+                <button
+                  onClick={() => setShowScheduler(!showScheduler)}
+                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                    showScheduler 
+                      ? "bg-blue-600 text-white hover:bg-blue-700" 
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  <IoMdCalendar className="text-xl" />
+                  <span className="font-medium">Schedule</span>
+                </button>
+              </>
             ) : (
               <div className="text-gray-400 text-sm">Select a conversation to start messaging</div>
             )}
@@ -477,6 +558,24 @@ export default function InboxPage() {
             </div>
           )}
         </div>
+
+        {/* Meeting Scheduler Panel */}
+        {showScheduler && selectedConversation && (
+          <div className="w-96 bg-white border-l-2 border-gray-300 shadow-lg">
+            <MeetingScheduler
+              conversationId={selectedConversation.id}
+              currentUserId={user!.id}
+              otherUserId={
+                selectedConversation.buyer_id === user!.id
+                  ? selectedConversation.seller_id
+                  : selectedConversation.buyer_id
+              }
+              itemId={selectedConversation.item_id ? Number(selectedConversation.item_id) : null}
+              sellerId={selectedConversation.seller_id}
+              buyerId={selectedConversation.buyer_id}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
