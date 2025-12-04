@@ -1,13 +1,12 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
-import Navbar from "../component/Navbar"
-import Sidebar from "../component/Sidebar"
 import Footer from "../component/Footer"
 import Providers from "../providers/Providers"
+import LayoutClient from "./layout-client"
 
 import { AuthProvider } from "../contexts/AuthContext"
-import { SearchProvider } from "../contexts/SearchContext" // ✅ <-- ADD THIS IMPORT
+import { SearchProvider } from "../contexts/SearchContext"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,25 +31,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* ✅ Wrap all content with your context providers */}
         <AuthProvider>
           <Providers>
-            <SearchProvider> {/* ✅ Add SearchProvider here */}
-
-              {/* Optional Navbar/Sidebar if needed globally */}
-              {/* <Navbar /> */}
-
-              <div className="flex min-h-screen flex-col">
-                {/* <Sidebar /> */}
-                <div className="flex-1 flex flex-col">
-                  <main className="relative overflow-hidden flex-1">
-                    {children}
-                  </main>
-                  <Footer />
-                </div>
-              </div>
-
-            </SearchProvider> {/* ✅ Close SearchProvider */}
+            <SearchProvider>
+              <LayoutClient>{children}</LayoutClient>
+            </SearchProvider>
           </Providers>
         </AuthProvider>
       </body>
