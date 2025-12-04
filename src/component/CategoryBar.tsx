@@ -9,13 +9,6 @@ const ClothingIcon = () => (
   </svg>
 )
 
-const FurnitureIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 21v-4a2 2 0 012-2h2a2 2 0 012 2v4" />
-  </svg>
-)
-
 const ElectronicsIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -54,7 +47,13 @@ const ToysIcon = () => (
   </svg>
 )
 
-type IconName = 'clothing' | 'furniture' | 'electronics' | 'books' | 'sports-outdoor' | 'home-garden' | 'beauty-health' | 'toys-games';
+const OtherIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+  </svg>
+)
+
+type IconName = 'clothing' | 'electronics' | 'books' | 'sports' | 'home-kitchen' | 'beauty' | 'toys' | 'other';
 
 interface Category {
   key: string;
@@ -71,34 +70,28 @@ const CATEGORIES: Category[] = [
     icon: 'clothing'
   },
   {
-    key: 'furniture',
-    label: 'Furniture',
-    href: '/categories/furniture',
-    icon: 'furniture'
-  },
-  {
     key: 'electronics',
     label: 'Electronics',
     href: '/categories/electronics',
     icon: 'electronics'
   },
   {
-    key: 'books',
-    label: 'Books',
-    href: '/categories/books',
-    icon: 'books'
-  },
-  {
     key: 'sports',
-    label: 'Sports & Outdoors',
+    label: 'Sports & Outdoor',
     href: '/categories/sports-outdoors',
     icon: 'sports'
   },
   {
-    key: 'home-garden',
-    label: 'Home & Garden',
-    href: '/categories/home-garden',
-    icon: 'home-garden'
+    key: 'home-kitchen',
+    label: 'Home & Kitchen',
+    href: '/categories/home-kitchen',
+    icon: 'home-kitchen'
+  },
+  {
+    key: 'books',
+    label: 'Books',
+    href: '/categories/books',
+    icon: 'books'
   },
   {
     key: 'beauty',
@@ -111,19 +104,25 @@ const CATEGORIES: Category[] = [
     label: 'Toys & Games',
     href: '/categories/toys-games',
     icon: 'toys'
+  },
+  {
+    key: 'other',
+    label: 'Other',
+    href: '/categories/other',
+    icon: 'other'
   }
 ]
 
 const getIcon = (iconName: IconName) => {
   const icons: Record<IconName, JSX.Element> = {
     clothing: <ClothingIcon />,
-    furniture: <FurnitureIcon />,
     electronics: <ElectronicsIcon />,
     books: <BooksIcon />,
     sports: <SportsIcon />,
-    'home-garden': <HomeGardenIcon />,
+    'home-kitchen': <HomeGardenIcon />,
     beauty: <BeautyIcon />,
-    toys: <ToysIcon />
+    toys: <ToysIcon />,
+    other: <OtherIcon />
   }
   return icons[iconName] || null
 }

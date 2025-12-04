@@ -5,13 +5,13 @@ import CategoryBar from "@/component/CategoryBar";
 import Breadcrumb from "@/component/Breadcrumb";
 import MarketplaceGrid from "../../../component/MarketplaceGrid";
 import Navbar from "@/component/Navbar";
-import ClothingFilters, {
-  ClothingFilterState,
-} from "@/component/ClothingFilters";
+import SportsFilters, {
+  SportsFilterState,
+} from "@/component/SportsFilters";
 import { createClient } from "@/utils/supabase/client";
 
-export default function ClothingPage() {
-  const [filters, setFilters] = useState<ClothingFilterState>({
+export default function SportsOutdoorsPage() {
+  const [filters, setFilters] = useState<SportsFilterState>({
     brands: [],
     priceRange: { min: 0, max: 1000 },
     sizes: [],
@@ -33,7 +33,7 @@ export default function ClothingPage() {
       const { data, error } = await supabase
         .from("items")
         .select("brand, size, color, condition")
-        .eq("category", "Clothing");
+        .eq("category", "Sports & Outdoor");
 
       if (error) {
         console.error("Error fetching filter options:", error);
@@ -66,7 +66,7 @@ export default function ClothingPage() {
     fetchFilterOptions();
   }, []);
 
-  const handleFilterChange = (newFilters: ClothingFilterState) => {
+  const handleFilterChange = (newFilters: SportsFilterState) => {
     setFilters(newFilters);
   };
 
@@ -75,15 +75,15 @@ export default function ClothingPage() {
       <Navbar />
       <CategoryBar />
       <div className="flex">
-        <ClothingFilters
+        <SportsFilters
           onFilterChange={handleFilterChange}
           availableFilters={availableFilters}
         />
         <div className="flex-1">
           <div className="px-4 py-6">
-            <Breadcrumb items={[{ label: "Clothing" }]} />
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Clothing</h1>
-            <MarketplaceGrid category="Clothing" clothingFilters={filters} />
+            <Breadcrumb items={[{ label: "Sports & Outdoor" }]} />
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">Sports & Outdoor</h1>
+            <MarketplaceGrid category="Sports & Outdoor" sportsFilters={filters} />
           </div>
         </div>
       </div>

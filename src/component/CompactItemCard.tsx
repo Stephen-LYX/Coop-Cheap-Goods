@@ -3,28 +3,13 @@ import Link from "next/link"
 import { useState } from "react"
 import { useItemContext } from "../contexts/ItemContext"
 import { useAuth } from "../contexts/AuthContext"
+import { Item } from "./ItemCard"
 
-const HeartIcon = ({ filled = false }) => (
-  <svg className="w-6 h-6" fill={filled ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-)
-
-export interface Item {
-  id: number | string
-  name: string
-  image: string
-  condition: string
-  price: number
-  user_id?: string
-  category?: string
-}
-
-interface ItemCardProperty {
+interface CompactItemCardProperty {
   item: Item
 }
 
-function ItemCard({ item }: ItemCardProperty) {
+function CompactItemCard({ item }: CompactItemCardProperty) {
   const { isFavorite, addToFavorites, removeFromFavorites, addToRecentlyViewed } = useItemContext()
   const { user } = useAuth()
   const favorite = isFavorite(item.id)
@@ -35,7 +20,6 @@ function ItemCard({ item }: ItemCardProperty) {
   const getCategoryPath = (category: string | undefined) => {
     if (!category) return 'other'
 
-    // Map category names to URL paths
     const categoryMap: { [key: string]: string } = {
       'Electronics': 'electronics',
       'Clothing': 'clothing',
@@ -63,18 +47,14 @@ function ItemCard({ item }: ItemCardProperty) {
     }
   }
 
-  // Placeholder image as data URL (a simple gray square with "No Image" text)
   const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%2364748b'%3ENo Image%3C/text%3E%3C/svg%3E"
 
-  // Determine the image source
   const getImageSrc = () => {
     if (imageError) return placeholderImage
     if (!item.image) return placeholderImage
-    
-    // If it's already a full path starting with /, use it as is
+
     if (item.image.startsWith('/')) return item.image
-    
-    // If it's just a filename, prepend /uploaded/
+
     return `/uploaded/${item.image}`
   }
 
@@ -82,53 +62,54 @@ function ItemCard({ item }: ItemCardProperty) {
   const itemUrl = `/categories/${categoryPath}/${item.id}`
 
   return (
-    <div className={`bg-white rounded-lg hover:shadow-md transition-shadow duration-200 group w-full ${
-      isOwnItem ? 'ring-2 ring-blue-500 shadow-lg' : ''
+    <div className={`bg-white rounded hover:shadow transition-shadow duration-200 group w-full ${
+      isOwnItem ? 'ring-1 ring-blue-400' : ''
     }`}>
       <Link href={itemUrl} onClick={handleItemClick} className="block">
         <div className="relative">
-          {/* Your Item Badge */}
           {isOwnItem && (
-            <div className="absolute top-2 left-2 z-10 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
-              Your Item
+            <div className="absolute top-0.5 left-0.5 z-10 bg-blue-500 text-white text-[8px] px-1 py-0.5 rounded-full">
+              Yours
             </div>
           )}
-          {/* Item Image */}
-          <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100 border border-gray-200 shadow-sm">
+          {/* Compact Item Image */}
+          <div className="aspect-square relative overflow-hidden rounded-t bg-gray-100">
             <Image
               src={getImageSrc()}
               alt={item.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-200"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+              sizes="(max-width: 640px) 25vw, 15vw"
               onError={() => setImageError(true)}
             />
-            {/* Wishlist Button Overlay */}
+            {/* Compact Wishlist Button */}
             <div className="absolute inset-0">
               <button
                 onClick={onFavoriteClick}
-                className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-sm transition-all duration-200 ${
-                  favorite 
-                    ? 'bg-red-500 text-white' 
+                className={`absolute top-0.5 right-0.5 p-0.5 rounded-full backdrop-blur-sm transition-all duration-200 ${
+                  favorite
+                    ? 'bg-red-500 text-white'
                     : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
                 }`}
               >
-                <HeartIcon filled={favorite} />
+                <svg className="w-2.5 h-2.5" fill={favorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Item Details */}
-        <div className="p-4">
+        {/* Compact Item Details */}
+        <div className="p-1">
           {/* Item Name */}
-          <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem] group-hover:text-blue-600 transition-colors">
+          <h3 className="text-[10px] font-semibold text-gray-900 mb-0.5 line-clamp-1 group-hover:text-blue-600 transition-colors leading-tight">
             {item.name}
           </h3>
 
           {/* Price */}
           <div className="flex items-center justify-between">
-            <span className="text-lg font-bold text-gray-900">
+            <span className="text-[10px] font-bold text-gray-900">
               ${item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </span>
           </div>
@@ -138,4 +119,4 @@ function ItemCard({ item }: ItemCardProperty) {
   )
 }
 
-export default ItemCard
+export default CompactItemCard

@@ -5,24 +5,20 @@ import CategoryBar from "@/component/CategoryBar";
 import Breadcrumb from "@/component/Breadcrumb";
 import MarketplaceGrid from "../../../component/MarketplaceGrid";
 import Navbar from "@/component/Navbar";
-import ClothingFilters, {
-  ClothingFilterState,
-} from "@/component/ClothingFilters";
+import ToysFilters, {
+  ToysFilterState,
+} from "@/component/ToysFilters";
 import { createClient } from "@/utils/supabase/client";
 
-export default function ClothingPage() {
-  const [filters, setFilters] = useState<ClothingFilterState>({
+export default function ToysGamesPage() {
+  const [filters, setFilters] = useState<ToysFilterState>({
     brands: [],
     priceRange: { min: 0, max: 1000 },
-    sizes: [],
-    colors: [],
     conditions: [],
   });
 
   const [availableFilters, setAvailableFilters] = useState({
     brands: [] as string[],
-    sizes: [] as string[],
-    colors: [] as string[],
     conditions: [] as string[],
   });
 
@@ -32,8 +28,8 @@ export default function ClothingPage() {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
         .from("items")
-        .select("brand, size, color, condition")
-        .eq("category", "Clothing");
+        .select("brand, condition")
+        .eq("category", "Toys & Games");
 
       if (error) {
         console.error("Error fetching filter options:", error);
@@ -44,20 +40,12 @@ export default function ClothingPage() {
         const brands = [
           ...new Set(data.map((item) => item.brand).filter(Boolean)),
         ] as string[];
-        const sizes = [
-          ...new Set(data.map((item) => item.size).filter(Boolean)),
-        ] as string[];
-        const colors = [
-          ...new Set(data.map((item) => item.color).filter(Boolean)),
-        ] as string[];
         const conditions = [
           ...new Set(data.map((item) => item.condition).filter(Boolean)),
         ] as string[];
 
         setAvailableFilters({
           brands: brands.sort(),
-          sizes,
-          colors: colors.sort(),
           conditions: conditions.sort(),
         });
       }
@@ -66,7 +54,7 @@ export default function ClothingPage() {
     fetchFilterOptions();
   }, []);
 
-  const handleFilterChange = (newFilters: ClothingFilterState) => {
+  const handleFilterChange = (newFilters: ToysFilterState) => {
     setFilters(newFilters);
   };
 
@@ -75,15 +63,15 @@ export default function ClothingPage() {
       <Navbar />
       <CategoryBar />
       <div className="flex">
-        <ClothingFilters
+        <ToysFilters
           onFilterChange={handleFilterChange}
           availableFilters={availableFilters}
         />
         <div className="flex-1">
           <div className="px-4 py-6">
-            <Breadcrumb items={[{ label: "Clothing" }]} />
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Clothing</h1>
-            <MarketplaceGrid category="Clothing" clothingFilters={filters} />
+            <Breadcrumb items={[{ label: "Toys & Games" }]} />
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">Toys & Games</h1>
+            <MarketplaceGrid category="Toys & Games" toysFilters={filters} />
           </div>
         </div>
       </div>

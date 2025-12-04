@@ -26,12 +26,11 @@ export default function SellPage() {
   const [color, setColor] = useState("");
 
   const categories = [
-    "Electronics",
-    "Furniture",
     "Clothing",
+    "Electronics",
+    "Sports & Outdoor",
+    "Home & Kitchen",
     "Books",
-    "Home & Garden",
-    "Sports & Outdoors",
     "Beauty & Health",
     "Toys & Games",
     "Other",

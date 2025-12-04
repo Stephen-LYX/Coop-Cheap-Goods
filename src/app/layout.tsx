@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import Navbar from "../component/Navbar"
 import Sidebar from "../component/Sidebar"
+import Footer from "../component/Footer"
 import Providers from "../providers/Providers"
 
 import { AuthProvider } from "../contexts/AuthContext"
@@ -39,12 +40,13 @@ export default function RootLayout({
               {/* Optional Navbar/Sidebar if needed globally */}
               {/* <Navbar /> */}
 
-              <div className="flex min-h-screen">
+              <div className="flex min-h-screen flex-col">
                 {/* <Sidebar /> */}
                 <div className="flex-1 flex flex-col">
-                  <main className="relative overflow-hidden">
+                  <main className="relative overflow-hidden flex-1">
                     {children}
                   </main>
+                  <Footer />
                 </div>
               </div>
 

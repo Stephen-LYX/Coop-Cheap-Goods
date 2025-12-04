@@ -6,10 +6,28 @@ import ItemCard from "./ItemCard"
 import { useSearchContext } from "../contexts/SearchContext"
 import { createClient } from "@/utils/supabase/client"
 import { ClothingFilterState } from "./ClothingFilters"
+import { ElectronicsFilterState } from "./ElectronicsFilters"
+import { BooksFilterState } from "./BooksFilters"
+import { BeautyFilterState } from "./BeautyFilters"
+import { HomeKitchenFilterState } from "./HomeKitchenFilters"
+import { SportsFilterState } from "./SportsFilters"
+import { ToysFilterState } from "./ToysFilters"
+import { OtherFilterState } from "./OtherFilters"
+import { FurnitureFilterState } from "./FurnitureFilters"
+
+type FilterState = ClothingFilterState | ElectronicsFilterState | BooksFilterState | BeautyFilterState | HomeKitchenFilterState | SportsFilterState | ToysFilterState | OtherFilterState | FurnitureFilterState
 
 interface MarketplaceGridProps {
   category?: string
   clothingFilters?: ClothingFilterState
+  electronicsFilters?: ElectronicsFilterState
+  booksFilters?: BooksFilterState
+  beautyFilters?: BeautyFilterState
+  homeKitchenFilters?: HomeKitchenFilterState
+  sportsFilters?: SportsFilterState
+  toysFilters?: ToysFilterState
+  otherFilters?: OtherFilterState
+  furnitureFilters?: FurnitureFilterState
 }
 
 interface Item {
@@ -28,7 +46,18 @@ interface Item {
   user_id?: string
 }
 
-const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) => {
+const MarketplaceGrid = ({
+  category,
+  clothingFilters,
+  electronicsFilters,
+  booksFilters,
+  beautyFilters,
+  homeKitchenFilters,
+  sportsFilters,
+  toysFilters,
+  otherFilters,
+  furnitureFilters
+}: MarketplaceGridProps) => {
   const { searchQuery } = useSearchContext()
   const [items, setItems] = useState<Item[]>([])
   const [sortBy, setSortBy] = useState('newest')
@@ -46,25 +75,28 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
         query = query.eq('category', category)
       }
 
-      // Apply clothing filters if provided
-      if (clothingFilters) {
-        if (clothingFilters.brands.length > 0) {
-          query = query.in('brand', clothingFilters.brands)
+      // Combine all filter types into one
+      const activeFilters = clothingFilters || electronicsFilters || booksFilters || beautyFilters || homeKitchenFilters || sportsFilters || toysFilters || otherFilters || furnitureFilters
+
+      // Apply filters if provided
+      if (activeFilters) {
+        if ('brands' in activeFilters && Array.isArray(activeFilters.brands) && activeFilters.brands.length > 0) {
+          query = query.in('brand', activeFilters.brands)
         }
-        if (clothingFilters.sizes.length > 0) {
-          query = query.in('size', clothingFilters.sizes)
+        if ('sizes' in activeFilters && Array.isArray(activeFilters.sizes) && (activeFilters.sizes as string[]).length > 0) {
+          query = query.in('size', activeFilters.sizes as string[])
         }
-        if (clothingFilters.colors.length > 0) {
-          query = query.in('color', clothingFilters.colors)
+        if ('colors' in activeFilters && Array.isArray(activeFilters.colors) && (activeFilters.colors as string[]).length > 0) {
+          query = query.in('color', activeFilters.colors as string[])
         }
-        if (clothingFilters.conditions.length > 0) {
-          query = query.in('condition', clothingFilters.conditions)
+        if ('conditions' in activeFilters && Array.isArray(activeFilters.conditions) && activeFilters.conditions.length > 0) {
+          query = query.in('condition', activeFilters.conditions)
         }
-        if (clothingFilters.priceRange) {
+        if (activeFilters.priceRange) {
           query = query
-            .gte('price', clothingFilters.priceRange.min)
-          if (clothingFilters.priceRange.max !== Infinity) {
-            query = query.lte('price', clothingFilters.priceRange.max)
+            .gte('price', activeFilters.priceRange.min)
+          if (activeFilters.priceRange.max !== Infinity) {
+            query = query.lte('price', activeFilters.priceRange.max)
           }
         }
       }
@@ -100,7 +132,7 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
 
   useEffect(() => {
     fetchItems()
-  }, [sortBy, category, clothingFilters])
+  }, [sortBy, category, clothingFilters, electronicsFilters, booksFilters, beautyFilters, homeKitchenFilters, sportsFilters, toysFilters, otherFilters, furnitureFilters])
 
   const filteredItems = items.filter(item => {
     if (!searchQuery.trim()) return true
@@ -181,15 +213,17 @@ const MarketplaceGrid = ({ category, clothingFilters }: MarketplaceGridProps) =>
               <div className="w-full px-2">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {filteredItems.map((item) => (
-                    <ItemCard 
-                      key={item.id} 
+                    <ItemCard
+                      key={item.id}
                       item={{
                         id: item.id,
                         name: item.title,
                         image: item.image_url || '',
                         condition: item.condition,
-                        price: item.price
-                      }} 
+                        price: item.price,
+                        user_id: item.user_id,
+                        category: item.category
+                      }}
                     />
                   ))}
                 </div>
