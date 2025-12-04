@@ -5,7 +5,8 @@
       "Bash(do sed -i 's/text-gray-900 dark:text-gray-100/text-gray-900/g' \"$file\")",
       "Bash(done)",
       "Bash(for file in src/component/RecommendedItemsBox.tsx src/component/FavoritedItemsBox.tsx src/component/RecentlyViewedBox.tsx)",
-      "Bash(for file in src/component/*Filters.tsx)"
+      "Bash(for file in src/component/*Filters.tsx)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

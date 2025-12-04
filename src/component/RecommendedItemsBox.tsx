@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import ItemCard from "./ItemCard"
+import CompactItemCard from "./CompactItemCard"
 import { createClient } from "@/utils/supabase/client"
 import { Item } from "./ItemCard"
 
@@ -87,7 +87,7 @@ export default function RecommendedItemsBox() {
       </div>
       <div className="grid grid-cols-2 gap-4">
         {recommendedItems.map((item) => (
-          <ItemCard key={item.id} item={item} />
+          <CompactItemCard key={item.id} item={item} />
         ))}
       </div>
     </div>

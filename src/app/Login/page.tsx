@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "@/lib/supabaseClient";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -153,136 +154,209 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">
-          {isResettingPassword ? "Reset Password" : isSignUp ? "Create Account" : "Login"}
-        </h1>
-
-        {isResettingPassword ? (
-          <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
-            <input
-              type="password"
-              placeholder="New Password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={6}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? "Updating..." : "Update Password"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsResettingPassword(false)}
-              className="text-sm text-blue-600 underline hover:text-blue-700 mt-2"
-            >
-              Back to Login
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-4">
-            {isSignUp && (
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="rounded-lg border border-gray-300 px-4 py-2 text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+      <div className="w-full max-w-6xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+          {/* Left Side - Branding */}
+          <div className="text-center lg:text-left space-y-4">
+            <div className="flex justify-center lg:justify-start items-center gap-4 mb-6">
+              <Image
+                src="/chicken.png"
+                alt="Coop Logo"
+                width={80}
+                height={80}
+                className="object-contain"
               />
-            )}
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="rounded-lg border border-gray-300 px-4 py-2 text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
-            {isSignUp && (
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
-            )}
-
-            <label className="flex items-start gap-2 text-sm text-gray-600">
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="mt-1"
-              />
-              <span>
-                I agree to the{" "}
-                <a href="/terms" target="_blank" className="text-blue-600 underline hover:text-blue-800">
-                  Terms and Conditions
-                </a>
-              </span>
-            </label>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-lg bg-blue-600 py-2 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? "Loading..." : isSignUp ? "Create Account" : "Log In"}
-            </button>
-
-            {!isSignUp && (
-              <button
-                type="button"
-                onClick={handleResetRequest}
-                className="text-sm text-blue-600 underline hover:text-blue-700 mt-2"
-              >
-                Forgot password?
-              </button>
-            )}
-          </form>
-        )}
-
-        {!isResettingPassword && (
-          <div className="mt-4 text-center">
-            <button
-              onClick={toggleMode}
-              className="text-blue-600 hover:text-blue-700 text-sm underline cursor-pointer"
-            >
-              {isSignUp
-                ? "Already have an account? Log in"
-                : "Don't have an account? Create one"}
-            </button>
+              <h1 className="text-5xl lg:text-6xl font-bold text-blue-600">
+                Coop
+              </h1>
+            </div>
+            <p className="text-2xl lg:text-3xl text-gray-700 max-w-md">
+              Your trusted marketplace for local communities.
+            </p>
           </div>
-        )}
 
-        {message && (
-          <p
-            className={`mt-4 text-center text-sm ${
-              message.includes("Error") ? "text-red-600" : "text-green-600"
-            }`}
-          >
-            {message}
-          </p>
-        )}
+          {/* Right Side - Form */}
+          <div className="w-full max-w-md mx-auto">
+            <div className="rounded-lg bg-white p-6 shadow-xl">
+              {isResettingPassword ? (
+                <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                    Reset Your Password
+                  </h2>
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="rounded-lg border border-gray-300 px-4 py-3 text-base text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="rounded-lg bg-blue-600 py-3 text-lg text-white font-semibold hover:bg-blue-700 disabled:opacity-50 transition"
+                  >
+                    {loading ? "Updating..." : "Update Password"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsResettingPassword(false)}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    Back to Login
+                  </button>
+                </form>
+              ) : isSignUp ? (
+                <form onSubmit={handleSignUp} className="flex flex-col gap-3">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-1">
+                    Create a new account
+                  </h2>
+                  <p className="text-gray-600 text-sm mb-2">It's quick and easy.</p>
+                  <input
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    className="rounded-lg border border-gray-300 px-4 py-3 text-base text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="rounded-lg border border-gray-300 px-4 py-3 text-base text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <input
+                    type="password"
+                    placeholder="New password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="rounded-lg border border-gray-300 px-4 py-3 text-base text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Confirm password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="rounded-lg border border-gray-300 px-4 py-3 text-base text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+
+                  <label className="flex items-start gap-2 text-xs text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={(e) => setAgreed(e.target.checked)}
+                      className="mt-1"
+                    />
+                    <span>
+                      I agree to the{" "}
+                      <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
+                        Terms and Conditions
+                      </a>
+                    </span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="rounded-lg bg-green-600 py-3 text-lg text-white font-semibold hover:bg-green-700 disabled:opacity-50 transition mt-2"
+                  >
+                    {loading ? "Creating..." : "Sign Up"}
+                  </button>
+
+                  <div className="border-t border-gray-300 mt-4 pt-4 text-center">
+                    <button
+                      type="button"
+                      onClick={toggleMode}
+                      className="text-blue-600 hover:underline text-sm"
+                    >
+                      Already have an account?
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleLogin} className="flex flex-col gap-3">
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="rounded-lg border border-gray-300 px-4 py-3 text-base text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="rounded-lg border border-gray-300 px-4 py-3 text-base text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+
+                  <label className="flex items-start gap-2 text-sm text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={(e) => setAgreed(e.target.checked)}
+                      className="mt-1"
+                    />
+                    <span>
+                      I agree to the{" "}
+                      <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
+                        Terms and Conditions
+                      </a>
+                    </span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="rounded-lg bg-blue-600 py-3 text-lg text-white font-semibold hover:bg-blue-700 disabled:opacity-50 transition"
+                  >
+                    {loading ? "Loading..." : "Log In"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetRequest}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+
+                  <div className="border-t border-gray-300 mt-4 pt-4 text-center">
+                    <button
+                      type="button"
+                      onClick={toggleMode}
+                      className="rounded-lg bg-green-600 px-12 py-3 text-lg text-white font-semibold hover:bg-green-700 transition"
+                    >
+                      Create new account
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {message && (
+                <p
+                  className={`mt-4 text-center text-sm ${
+                    message.includes("Error") ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

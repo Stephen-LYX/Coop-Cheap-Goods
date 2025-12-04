@@ -1,7 +1,7 @@
 'use client'
 
 import { useItemContext } from "../contexts/ItemContext"
-import ItemCard from "./ItemCard"
+import CompactItemCard from "./CompactItemCard"
 import Link from "next/link"
 
 export default function FavoritedItemsBox() {
@@ -27,7 +27,7 @@ export default function FavoritedItemsBox() {
       </div>
       <div className="grid grid-cols-2 gap-4">
         {displayedFavorites.map((item) => (
-          <ItemCard key={item.id} item={item} />
+          <CompactItemCard key={item.id} item={item} />
         ))}
       </div>
     </div>
