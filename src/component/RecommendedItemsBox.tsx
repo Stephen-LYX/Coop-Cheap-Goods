@@ -85,7 +85,7 @@ export default function RecommendedItemsBox() {
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900">Recommended for You</h2>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-8">
         {recommendedItems.map((item) => (
           <CompactItemCard key={item.id} item={item} />
         ))}

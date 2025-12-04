@@ -44,7 +44,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/Sell" className="text-sm hover:text-white transition-colors duration-200">
+                <Link href="/sell" className="text-sm hover:text-white transition-colors duration-200">
                   Sell an Item
                 </Link>
               </li>

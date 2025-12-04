@@ -25,7 +25,7 @@ export default function FavoritedItemsBox() {
           View all
         </Link>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-8">
         {displayedFavorites.map((item) => (
           <CompactItemCard key={item.id} item={item} />
         ))}
