@@ -90,7 +90,9 @@ export default function InboxPage() {
   }, [selectedConversation]);
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0) {
+      setTimeout(() => scrollToBottom(), 100);
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -299,7 +301,7 @@ export default function InboxPage() {
   }
 
   function scrollToBottom() {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
   }
 
   async function checkPendingNotifications() {
