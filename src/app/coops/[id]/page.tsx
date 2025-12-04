@@ -1,18 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/component/Navbar";
 import MarketplaceGrid from "@/component/MarketplaceGrid";
 
 export default function CoopPage({ params }) {
+  // FIX: ensure stable unwrap
+  const { id: coopId } = React.use(params || {});
+
   const { supabase, user } = useAuth();
-  const coopId = params.id;
 
   const [coop, setCoop] = useState(null);
   const [isMember, setIsMember] = useState(false);
 
   useEffect(() => {
+    if (!coopId) return;
+
     const load = async () => {
       // Load coop
       const { data: coopData } = await supabase
@@ -32,16 +36,16 @@ export default function CoopPage({ params }) {
         .eq("coop_id", coopId)
         .eq("user_id", user.id);
 
-      setIsMember(memberCheck.length > 0);
+      setIsMember(memberCheck?.length > 0);
     };
 
     load();
-  }, [supabase, user]);
+  }, [supabase, user, coopId]); // now stable
 
   const handleJoin = async () => {
     await supabase.from("coop_members").insert({
       coop_id: coopId,
-      user_id: user.id
+      user_id: user.id,
     });
     setIsMember(true);
   };

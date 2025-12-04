@@ -10,13 +10,36 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [newPassword, setNewPassword] = useState(""); // For password reset
+  const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
 
+  // -------------------------
+  // Scalable college domain mapping
+  // -------------------------
+  const getDomain = (email: string) =>
+    email.split("@")[1]?.toLowerCase() ?? "";
+
+  const findCollegeDomain = async (email: string) => {
+    const domain = getDomain(email);
+    if (!domain) return null;
+
+    const { data } = await supabase
+      .from("college_domains")
+      .select("*")
+      .eq("domain", domain)
+      .maybeSingle();
+
+    return data ?? null;
+  };
+  // -------------------------
+
+  // -------------------------
+  // LOGIN
+  // -------------------------
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -29,7 +52,10 @@ export default function LoginPage() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
       if (error) {
         setMessage("Error: " + error.message);
@@ -44,7 +70,11 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+  // -------------------------
 
+  // -------------------------
+  // SIGNUP with auto-join to coop_members
+  // -------------------------
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -69,22 +99,51 @@ export default function LoginPage() {
     }
 
     try {
+      // -------------------------
+      // 1️⃣ Find college domain
+      // -------------------------
+      const collegeRecord = await findCollegeDomain(email);
+
+      // -------------------------
+      // 2️⃣ Create user in Supabase
+      // -------------------------
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { username } },
+        options: {
+          data: {
+            username,
+            college_domain_id: collegeRecord?.id ?? null,
+          },
+        },
       });
 
       if (error) {
         setMessage("Error: " + error.message);
+        setLoading(false);
+        return;
+      }
+
+      // -------------------------
+      // 3️⃣ Auto-join the user to their university coop
+      // -------------------------
+      if (collegeRecord && data.user) {
+        // Insert into coop_members
+        await supabase.from("coop_members").insert({
+          coops_id: collegeRecord.coop_id,
+          user_id: data.user.id,
+          joined_at: new Date().toISOString(),
+        });
+      }
+
+      // -------------------------
+      // 4️⃣ Message / redirect
+      // -------------------------
+      if (data.user && !data.user.email_confirmed_at) {
+        setMessage("Success! Please check your email to confirm your account.");
       } else {
-        if (data.user && !data.user.email_confirmed_at) {
-          setMessage("Success! Please check your email to confirm your account.");
-        } else {
-          console.log("✅ Signup success:", data.user?.id);
-          setMessage("Account created. Check email to confirm or you'll be redirected.");
-          router.push("/Home");
-        }
+        setMessage("Account created. Redirecting...");
+        router.push("/home");
       }
     } catch (err: any) {
       console.error("Signup network error:", err);
@@ -93,19 +152,23 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+  // -------------------------
 
+  // -------------------------
+  // PASSWORD RESET
+  // -------------------------
   const handleResetRequest = async () => {
     if (!email) {
       setMessage("Please enter your email first.");
       return;
     }
     setLoading(true);
-    
+
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/login`,
       });
-      
+
       if (error) {
         setMessage("Error: " + error.message);
       } else {
@@ -123,10 +186,10 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-    
+
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
-      
+
       if (error) {
         setMessage("Error: " + error.message);
       } else {
@@ -141,6 +204,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+  // -------------------------
 
   const toggleMode = () => {
     setIsSignUp(!isSignUp);
@@ -235,7 +299,11 @@ export default function LoginPage() {
               />
               <span>
                 I agree to the{" "}
-                <a href="/terms" target="_blank" className="text-blue-600 underline hover:text-blue-800">
+                <a
+                  href="/terms"
+                  target="_blank"
+                  className="text-blue-600 underline hover:text-blue-800"
+                >
                   Terms and Conditions
                 </a>
               </span>

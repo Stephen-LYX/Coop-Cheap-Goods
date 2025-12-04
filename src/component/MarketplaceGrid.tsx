@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import ItemCard from "./ItemCard";
 import { useSearchContext } from "../contexts/SearchContext";
-import { createClient } from "@/utils/supabase/client";  // ✅ Updated client import
+import { createClient } from "@/utils/supabase/client";
 
 interface MarketplaceGridProps {
   category?: string;
+  coopId?: string;   // ✅ Added
 }
 
 interface Item {
@@ -21,15 +22,16 @@ interface Item {
   image_url: string | null;
   created_at?: string;
   user_id?: string;
+  coop_id?: string;  // ✅ Ensure your table has this
 }
 
-const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
+const MarketplaceGrid = ({ category, coopId }: MarketplaceGridProps) => {
   const { searchQuery } = useSearchContext();
   const [items, setItems] = useState<Item[]>([]);
   const [sortBy, setSortBy] = useState("newest");
   const [loading, setLoading] = useState(true);
 
-  const supabase = createClient(); // ✅ Now uses the session-aware browser client
+  const supabase = createClient();
 
   const fetchItems = async () => {
     setLoading(true);
@@ -37,10 +39,17 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
     try {
       let query = supabase.from("items").select("*");
 
+      // ✅ Filter by coop if provided
+      if (coopId) {
+        query = query.eq("coop_id", coopId);
+      }
+
+      // Category filter still works
       if (category) {
         query = query.eq("category", category);
       }
 
+      // Sorting
       switch (sortBy) {
         case "price-low":
           query = query.order("price", { ascending: true });
@@ -72,7 +81,7 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
 
   useEffect(() => {
     fetchItems();
-  }, [sortBy, category]);
+  }, [sortBy, category, coopId]); // ✅ Added coopId so it refreshes properly
 
   const filteredItems = items.filter((item) => {
     if (!searchQuery.trim()) return true;
@@ -88,6 +97,7 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
 
   return (
     <div className="px-6 py-4 max-w-7xl mx-auto">
+      {/* Sorting + Search Results Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           {searchQuery.trim() && (
@@ -113,12 +123,14 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
         </select>
       </div>
 
+      {/* Loading state */}
       {loading ? (
         <div className="flex justify-center items-center py-12">
           <div className="text-gray-600 text-lg">Loading...</div>
         </div>
       ) : (
         <>
+          {/* Empty search result */}
           {filteredItems.length === 0 && searchQuery.trim() && (
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
@@ -146,6 +158,7 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
             </div>
           )}
 
+          {/* Empty category */}
           {filteredItems.length === 0 && !searchQuery.trim() && (
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
@@ -158,6 +171,7 @@ const MarketplaceGrid = ({ category }: MarketplaceGridProps) => {
             </div>
           )}
 
+          {/* Items Grid */}
           {filteredItems.length > 0 && (
             <>
               <div className="w-full px-8">
