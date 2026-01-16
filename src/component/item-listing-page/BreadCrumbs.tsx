@@ -1,5 +1,5 @@
 /*
-Title: BreadCrumbs Component
+Title: BreadCrumbs Component for Product Listing Pages
 Author: Miles Paleveda
 Date: 1/16/2026
 
@@ -17,7 +17,7 @@ Credits: This file includes the following third party and open source softwares:
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function BreadCrumbs() {
+export function BreadCrumbs({ title }) {
   const pathname = usePathname();
   const segments = pathname.split("/").filter((segment) => segment);
 
@@ -84,7 +84,7 @@ export function BreadCrumbs() {
                   href={link}
                   className="inline-flex items-center text-sm font-medium text-body hover:text-blue-700"
                 >
-                  {name}
+                  {index == segments.length - 1 ? title : name}
                 </Link>
               </div>
             </li>
