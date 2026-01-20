@@ -10,9 +10,9 @@ type AuthContextType = {
   loading: boolean;
   supabase: typeof supabase;
   // helper auth functions (optional)
-  login: (email: string, password: string) => Promise<any>;
-  signUp: (email: string, password: string, username?: string) => Promise<any>;
-  logout: () => Promise<any>;
+  login: (email: string, password: string) => Promise<unknown>;
+  signUp: (email: string, password: string, username?: string) => Promise<unknown>;
+  logout: () => Promise<unknown>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

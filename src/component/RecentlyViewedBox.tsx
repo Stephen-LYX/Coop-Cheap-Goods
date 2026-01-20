@@ -3,6 +3,7 @@
 import { useItemContext } from "../contexts/ItemContext"
 import CompactItemCard from "./CompactItemCard"
 import Link from "next/link"
+import { Item } from "./ItemCard"
 
 export default function RecentlyViewedBox() {
   const { recentlyViewed } = useItemContext()
@@ -27,7 +28,7 @@ export default function RecentlyViewedBox() {
       </div>
       <div className="grid grid-cols-2 gap-8">
         {displayedItems.map((item) => (
-          <CompactItemCard key={item.id} item={item} />
+          <CompactItemCard key={item.id} item={item as Item} />
         ))}
       </div>
     </div>

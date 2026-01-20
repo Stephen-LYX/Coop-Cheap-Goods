@@ -392,7 +392,7 @@ const ProfilePage = () => {
           ) : userItems.length === 0 ? (
             <div className="text-center py-12">
               <Package />
-              <p className="text-gray-600 mt-4 mb-6">You haven't posted any items yet</p>
+              <p className="text-gray-600 mt-4 mb-6">You haven&apos;t posted any items yet</p>
               <a
                 href="/sell"
                 className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"

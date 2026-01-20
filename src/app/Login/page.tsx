@@ -38,7 +38,7 @@ export default function LoginPage() {
         setMessage("Login successful! Welcome " + data.user.email);
         router.push("/home");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login network error:", err);
       setMessage("Network error");
     } finally {
@@ -87,7 +87,7 @@ export default function LoginPage() {
           router.push("/Home");
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signup network error:", err);
       setMessage("Network error");
     } finally {
@@ -112,7 +112,7 @@ export default function LoginPage() {
       } else {
         setMessage("Password reset link sent! Check your email.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Reset request error:", err);
       setMessage("Network error");
     } finally {
@@ -135,7 +135,7 @@ export default function LoginPage() {
         setIsResettingPassword(false);
         setNewPassword("");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Password update error:", err);
       setMessage("Network error");
     } finally {
@@ -213,7 +213,7 @@ export default function LoginPage() {
                   <h2 className="text-2xl font-bold text-gray-800 mb-1">
                     Create a new account
                   </h2>
-                  <p className="text-gray-600 text-sm mb-2">It's quick and easy.</p>
+                  <p className="text-gray-600 text-sm mb-2">It&apos;s quick and easy.</p>
                   <input
                     type="text"
                     placeholder="Username"

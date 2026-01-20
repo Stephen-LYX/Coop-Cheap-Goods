@@ -11,6 +11,13 @@ import { encryptMessage, decryptMessage } from "@/lib/encryption";
 import { ensureConversationKey } from "@/lib/keyManagement";
 import MeetingScheduler from "@/component/MeetingScheduler";
 import NotificationModal from "@/component/NotificationModal";
+import Image from "next/image";
+
+type User = {
+  id: string;
+  username?: string;
+  full_name?: string;
+};
 
 type Conversation = {
   id: string;
@@ -19,17 +26,11 @@ type Conversation = {
   item_id?: string | number;
   last_message?: string | null;
   last_message_at?: string | null;
-  buyer?: any;
-  seller?: any;
+  buyer?: User;
+  seller?: User;
   item?: { title?: string; image_url?: string };
   other_user?: { id: string; username?: string; full_name?: string; avatar_url?: string };
   unread_count?: number;
-};
-
-type User = {
-  id: string;
-  username?: string;
-  full_name?: string;
 };
 
 type Message = {
@@ -135,11 +136,12 @@ export default function InboxPage() {
 
       if (error) throw error;
 
-      const convs = (data || []) as any[];
+      const convs = (data || []) as unknown[];
 
       const annotated = await Promise.all(
         convs.map(async (conv) => {
-          const convId: string = conv.id;
+          const convRecord = conv as Record<string, unknown>;
+          const convId: string = convRecord.id as string;
           const { count } = await supabase
             .from("messages")
             .select("*", { count: "exact", head: true })
@@ -147,11 +149,11 @@ export default function InboxPage() {
             .eq("receiver_id", user?.id)
             .eq("is_read", false);
 
-          const isCurrentBuyer = conv.buyer_id === user?.id;
-          const otherUser = isCurrentBuyer ? conv.seller : conv.buyer;
+          const isCurrentBuyer = (convRecord.buyer_id as string) === user?.id;
+          const otherUser = isCurrentBuyer ? convRecord.seller : convRecord.buyer;
 
           return {
-            ...conv,
+            ...convRecord,
             other_user: otherUser,
             unread_count: count ?? 0,
           } as Conversation;
@@ -199,23 +201,25 @@ export default function InboxPage() {
 
       // Decrypt messages
       const mapped: Message[] = await Promise.all(
-        (data || []).map(async (m: any) => {
-          let decryptedContent = m.content;
+        (data || []).map(async (m: unknown) => {
+          const mRecord = m as Record<string, unknown>;
+          let decryptedContent = mRecord.content as string;
           
           // Try to decrypt the message
           try {
-            decryptedContent = await decryptMessage(m.content, encryptionKey);
+            decryptedContent = await decryptMessage(mRecord.content as string, encryptionKey);
           } catch (err) {
             // If decryption fails, it might be a plain text message (migration scenario)
             console.warn('Could not decrypt message, using plain text:', err);
-            decryptedContent = m.content;
+            decryptedContent = mRecord.content as string;
           }
 
+          const sender = mRecord.sender as Record<string, unknown> | undefined;
           return {
-            ...m,
+            ...mRecord,
             content: decryptedContent,
-            sender_name: m.sender?.username || m.sender?.full_name || "Unknown",
-          };
+            sender_name: sender?.username as string || sender?.full_name as string || "Unknown",
+          } as Message;
         })
       );
 
@@ -408,9 +412,10 @@ export default function InboxPage() {
                     onClick={() => selectConversation(conv)}
                   >
                     <div className="relative flex-shrink-0">
-                      <img 
+                      <Image 
                         src={conv.other_user?.avatar_url ?? "/default-avatar.png"} 
                         alt={conv.other_user?.username ?? "User"} 
+                        width={56} height={56}
                         className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100"
                       />
                       {conv.unread_count && conv.unread_count > 0 && (
@@ -459,9 +464,10 @@ export default function InboxPage() {
             {selectedConversation ? (
               <>
                 <div className="flex items-center gap-4">
-                  <img 
+                  <Image 
                     src={selectedConversation.other_user?.avatar_url ?? "/default-avatar.png"} 
                     alt="User avatar"
+                    width={48} height={48}
                     className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                   />
                   <div>

@@ -18,9 +18,9 @@ Credits: This file includes the following third party and open source softwares:
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 
-export function ReviewRatingStars({ rating }) {
+export function ReviewRatingStars({ rating }: { rating: number }) {
   //build array for rating stars
-  function buildRatingArray(rating) {
+  function buildRatingArray(rating: number) {
     const arr = Array(5);
     for (let i = 0; i < arr.length; i++) {
       let value;

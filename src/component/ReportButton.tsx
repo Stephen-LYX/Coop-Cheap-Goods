@@ -19,16 +19,20 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
-export function ReportButton({ reported, userID, itemID }) {
+export function ReportButton({ reported, userID, itemID }: { reported: boolean; userID: string | undefined; itemID: string | number }) {
   const [text, setText] = useState<string>(
     reported ? "Item Already Reported" : "Report Item"
   );
-  const [disabled, setDisabled] = useState<boolean>(reported ? true : false);
+  const [disabled, setDisabled] = useState<boolean>(reported || !userID);
   const [reason, setReason] = useState("");
 
   //report item
   async function reportItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!userID) {
+      setText("Please log in to report items");
+      return;
+    }
     setDisabled(true);
     setText("Reporting...");
     try {
@@ -137,7 +141,7 @@ export function ReportButton({ reported, userID, itemID }) {
                       type="submit"
                       className="text-white bg-red-600 rounded hover:bg-red-700 text-sm px-4 py-2.5"
                     >
-                      Yes, I'm sure
+                      Yes, I&apos;m sure
                     </button>
                     <button
                       data-modal-hide="popup-modal"

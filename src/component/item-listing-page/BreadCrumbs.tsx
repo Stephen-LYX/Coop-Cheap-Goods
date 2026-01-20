@@ -17,7 +17,7 @@ Credits: This file includes the following third party and open source softwares:
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function BreadCrumbs({ title }) {
+export function BreadCrumbs({ title }: { title: string }) {
   const pathname = usePathname();
   const segments = pathname.split("/").filter((segment) => segment);
 

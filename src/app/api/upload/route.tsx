@@ -31,7 +31,7 @@ export const POST = async (req: Request) => {
     fs.writeFileSync(path.join(uploadsDir, filename), buffer);
 
     return NextResponse.json({ filename });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }

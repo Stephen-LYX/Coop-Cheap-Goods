@@ -3,6 +3,7 @@
 import { useItemContext } from "../contexts/ItemContext"
 import CompactItemCard from "./CompactItemCard"
 import Link from "next/link"
+import { Item } from "./ItemCard"
 
 export default function FavoritedItemsBox() {
   const { favorites } = useItemContext()
@@ -27,7 +28,7 @@ export default function FavoritedItemsBox() {
       </div>
       <div className="grid grid-cols-2 gap-8">
         {displayedFavorites.map((item) => (
-          <CompactItemCard key={item.id} item={item} />
+          <CompactItemCard key={item.id} item={item as Item} />
         ))}
       </div>
     </div>

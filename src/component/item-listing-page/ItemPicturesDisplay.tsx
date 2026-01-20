@@ -18,14 +18,15 @@ Credits: This file includes the following third party and open source softwares:
 import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
+import { Item } from "../ItemCard";
 
-export function ItemPicturesDisplay({ item }) {
+export function ItemPicturesDisplay({ item }: { item: Item }) {
   return (
     <div>
       <div className="aspect-square overflow-hidden">
         <Image
-          src={`/uploaded/${item.image_url}`}
-          alt={item.title}
+          src={`/uploaded/${item.image}`}
+          alt={item.name}
           width={800}
           height={800}
           objectFit="cover"
@@ -38,8 +39,8 @@ export function ItemPicturesDisplay({ item }) {
       <div className="grid grid-cols-5 gap-4 mb-4">
         <div className="aspect-square overflow-hidden">
           <Image
-            src={`/uploaded/${item.image_url}`}
-            alt={item.title}
+            src={`/uploaded/${item.image}`}
+            alt={item.name}
             width={180}
             height={180}
             className="bg-gray-300"
@@ -47,8 +48,8 @@ export function ItemPicturesDisplay({ item }) {
         </div>
         <div className="aspect-square overflow-hidden">
           <Image
-            src={`/uploaded/${item.image_url}`}
-            alt={item.title}
+            src={`/uploaded/${item.image}`}
+            alt={item.name}
             width={180}
             height={180}
             className="bg-gray-300"
@@ -56,8 +57,8 @@ export function ItemPicturesDisplay({ item }) {
         </div>
         <div className="aspect-square overflow-hidden">
           <Image
-            src={`/uploaded/${item.image_url}`}
-            alt={item.title}
+            src={`/uploaded/${item.image}`}
+            alt={item.name}
             width={180}
             height={180}
             className="bg-gray-300"
@@ -65,8 +66,8 @@ export function ItemPicturesDisplay({ item }) {
         </div>
         <div className="aspect-square overflow-hidden">
           <Image
-            src={`/uploaded/${item.image_url}`}
-            alt={item.title}
+            src={`/uploaded/${item.image}`}
+            alt={item.name}
             width={180}
             height={180}
             className="bg-gray-300"
@@ -74,8 +75,8 @@ export function ItemPicturesDisplay({ item }) {
         </div>
         <div className="aspect-square overflow-hidden">
           <Image
-            src={`/uploaded/${item.image_url}`}
-            alt={item.title}
+            src={`/uploaded/${item.image}`}
+            alt={item.name}
             width={180}
             height={180}
             className="bg-gray-300"

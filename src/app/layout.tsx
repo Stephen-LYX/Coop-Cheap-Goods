@@ -7,6 +7,7 @@ import LayoutClient from "./layout-client";
 
 import { AuthProvider } from "../contexts/AuthContext";
 import { SearchProvider } from "../contexts/SearchContext";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,7 +47,7 @@ export default function RootLayout({
             </SearchProvider>
           </Providers>
         </AuthProvider>
-        <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
+        <Script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js" strategy="afterInteractive" />
       </body>
     </html>
   );
