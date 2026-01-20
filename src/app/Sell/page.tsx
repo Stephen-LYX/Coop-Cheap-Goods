@@ -6,6 +6,7 @@ import Navbar from "@/component/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Upload, X } from "lucide-react";
 import { CATEGORIES } from "@/component/CategoryBar";
+import Image from "next/image";
 
 export default function SellPage() {
   const { user, supabase, loading } = useAuth();
@@ -207,7 +208,7 @@ export default function SellPage() {
             <div className="flex gap-3 flex-wrap">
               {imagePreviews.map((preview, index) => (
                 <div key={index} className="relative w-32 h-32 rounded-lg overflow-hidden bg-gray-100">
-                  <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                  <Image src={preview} alt={`Preview ${index + 1}`} width={128} height={128} className="w-full h-full object-cover" />
                   <button
                     type="button"
                     onClick={() => removeImage(index)}

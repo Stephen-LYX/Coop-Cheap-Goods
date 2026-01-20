@@ -55,7 +55,7 @@ export default async function Item({
       .throwOnError();
 
     //If user, check if user already reported this item
-    let reported;
+    let reported = false;
     if (user) {
       const { data: reports } = await supabase
         .from("reports")
@@ -77,7 +77,7 @@ export default async function Item({
 
     //get the average rating of all reviews of the seller
     const {
-      data: { avg: sellerRating },
+      data,
       error: sellerRatingError,
     } = await supabase
       .from("seller_reviews")
@@ -85,10 +85,12 @@ export default async function Item({
       .eq("seller", "00000000-0000-0000-0000-000000000002")
       .single();
 
+    const sellerRating = data?.avg ?? 0;
+
     console.log(sellerRating);
 
     //build array for rating stars
-    function buildRatingArray(rating) {
+    function buildRatingArray(rating: number) {
       const arr = Array(5);
       for (let i = 0; i < arr.length; i++) {
         let value;
@@ -238,7 +240,7 @@ export default async function Item({
               <hr className="my-4"></hr>
               <h2 className="text-xl font-bold">Recent Seller Reviews</h2>
               <ul>
-                {sellerReviews.map((review) => {
+                {sellerReviews?.map((review) => {
                   //get reviewer username
                   async function getReviewerUserName() {
                     const { data: reviewer } = await supabase
@@ -246,7 +248,7 @@ export default async function Item({
                       .select("username")
                       .eq("id", review.reviewer)
                       .single();
-                    const { username } = reviewer;
+                    const username = reviewer?.username;
                     return username;
                   }
                   const reviewerUserName = getReviewerUserName();

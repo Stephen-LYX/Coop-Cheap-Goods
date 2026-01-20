@@ -158,7 +158,7 @@ const MarketplaceGrid = ({
           {searchQuery.trim() && (
             <>
               <h1 className="text-2xl font-bold text-gray-900">
-                Search Results for "{searchQuery}"
+                Search Results for &quot;{searchQuery}&quot;
               </h1>
               <p className="text-gray-600 mt-1">
                 {filteredItems.length} items found
@@ -192,7 +192,7 @@ const MarketplaceGrid = ({
                 </svg>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
                 <p className="text-gray-600 mb-4">
-                  We couldn't find any items matching "{searchQuery}". Try different search terms.
+                  We couldn&apos;t find any items matching &quot;{searchQuery}&quot;. Try different search terms.
                 </p>
               </div>
             </div>

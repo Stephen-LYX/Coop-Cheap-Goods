@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import React from "react"
 
 // Icon components for different categories
 const ClothingIcon = () => (
@@ -126,7 +127,7 @@ export const CATEGORIES: Category[] = [
 ]
 
 const getIcon = (iconName: IconName) => {
-  const icons: Record<IconName, JSX.Element> = {
+  const icons: Record<IconName, React.ReactElement> = {
     clothing: <ClothingIcon />,
     electronics: <ElectronicsIcon />,
     books: <BooksIcon />,
