@@ -14,8 +14,9 @@ import { SportsFilterState } from "./SportsFilters"
 import { ToysFilterState } from "./ToysFilters"
 import { OtherFilterState } from "./OtherFilters"
 import { FurnitureFilterState } from "./FurnitureFilters"
+import { MusicalInstrumentsFilterState } from "./MusicalInstrumentsFilters"
 
-type FilterState = ClothingFilterState | ElectronicsFilterState | BooksFilterState | BeautyFilterState | HomeKitchenFilterState | SportsFilterState | ToysFilterState | OtherFilterState | FurnitureFilterState
+type FilterState = ClothingFilterState | ElectronicsFilterState | BooksFilterState | BeautyFilterState | HomeKitchenFilterState | SportsFilterState | ToysFilterState | OtherFilterState | FurnitureFilterState | MusicalInstrumentsFilterState
 
 interface MarketplaceGridProps {
   category?: string
@@ -28,6 +29,7 @@ interface MarketplaceGridProps {
   toysFilters?: ToysFilterState
   otherFilters?: OtherFilterState
   furnitureFilters?: FurnitureFilterState
+  musicalInstrumentsFilters?: MusicalInstrumentsFilterState
 }
 
 interface Item {
@@ -56,7 +58,8 @@ const MarketplaceGrid = ({
   sportsFilters,
   toysFilters,
   otherFilters,
-  furnitureFilters
+  furnitureFilters,
+  musicalInstrumentsFilters
 }: MarketplaceGridProps) => {
   const { searchQuery } = useSearchContext()
   const [items, setItems] = useState<Item[]>([])
@@ -76,7 +79,7 @@ const MarketplaceGrid = ({
       }
 
       // Combine all filter types into one
-      const activeFilters = clothingFilters || electronicsFilters || booksFilters || beautyFilters || homeKitchenFilters || sportsFilters || toysFilters || otherFilters || furnitureFilters
+      const activeFilters = clothingFilters || electronicsFilters || booksFilters || beautyFilters || homeKitchenFilters || sportsFilters || toysFilters || otherFilters || furnitureFilters || musicalInstrumentsFilters
 
       // Apply filters if provided
       if (activeFilters) {
@@ -132,7 +135,7 @@ const MarketplaceGrid = ({
 
   useEffect(() => {
     fetchItems()
-  }, [sortBy, category, clothingFilters, electronicsFilters, booksFilters, beautyFilters, homeKitchenFilters, sportsFilters, toysFilters, otherFilters, furnitureFilters])
+  }, [sortBy, category, clothingFilters, electronicsFilters, booksFilters, beautyFilters, homeKitchenFilters, sportsFilters, toysFilters, otherFilters, furnitureFilters, musicalInstrumentsFilters])
 
   const filteredItems = items.filter(item => {
     if (!searchQuery.trim()) return true

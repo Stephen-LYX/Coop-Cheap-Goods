@@ -21,11 +21,11 @@ const BooksIcon = () => (
   </svg>
 )
 
-const SportsIcon = () => (
+const OutdoorIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <circle cx="5.5" cy="17.5" r="2.5" strokeWidth={2} />
-    <circle cx="18.5" cy="17.5" r="2.5" strokeWidth={2} />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 6a1 1 0 100-2 1 1 0 000 2zM12 17.5l-3.5-7 5-1 1.5 2.5M8 12l5 5.5M12 8.5L15.5 15" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10c-2-4 1-7 5-7-1 4-2 7-5 7zm0 0c2-4-1-7-5-7 1 4 2 7 5 7z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v4" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 14h10l-1 7H8l-1-7z" />
   </svg>
 )
 
@@ -47,13 +47,19 @@ const ToysIcon = () => (
   </svg>
 )
 
+const MusicIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+  </svg>
+)
+
 const OtherIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
   </svg>
 )
 
-type IconName = 'clothing' | 'electronics' | 'books' | 'sports' | 'home-kitchen' | 'beauty' | 'toys' | 'other';
+type IconName = 'clothing' | 'electronics' | 'books' | 'outdoor' | 'home-kitchen' | 'beauty' | 'toys' | 'music' | 'other';
 
 interface Category {
   key: string;
@@ -62,7 +68,7 @@ interface Category {
   icon: IconName;
 }
 
-const CATEGORIES: Category[] = [
+export const CATEGORIES: Category[] = [
   {
     key: 'clothing',
     label: 'Clothing',
@@ -76,15 +82,15 @@ const CATEGORIES: Category[] = [
     icon: 'electronics'
   },
   {
-    key: 'sports',
-    label: 'Sports & Outdoor',
-    href: '/categories/sports-outdoors',
-    icon: 'sports'
+    key: 'outdoors',
+    label: 'Garden & Outdoors',
+    href: '/categories/garden-and-outdoor',
+    icon: 'outdoor'
   },
   {
     key: 'home-kitchen',
     label: 'Home & Kitchen',
-    href: '/categories/home-kitchen',
+    href: '/categories/home-and-kitchen',
     icon: 'home-kitchen'
   },
   {
@@ -106,6 +112,12 @@ const CATEGORIES: Category[] = [
     icon: 'toys'
   },
   {
+    key: 'music',
+    label: 'Musical Instruments',
+    href: '/categories/musical-instruments',
+    icon: 'music'
+  },
+  {
     key: 'other',
     label: 'Other',
     href: '/categories/other',
@@ -118,10 +130,11 @@ const getIcon = (iconName: IconName) => {
     clothing: <ClothingIcon />,
     electronics: <ElectronicsIcon />,
     books: <BooksIcon />,
-    sports: <SportsIcon />,
+    outdoor: <OutdoorIcon />,
     'home-kitchen': <HomeGardenIcon />,
     beauty: <BeautyIcon />,
     toys: <ToysIcon />,
+    music: <MusicIcon />,
     other: <OtherIcon />
   }
   return icons[iconName] || null

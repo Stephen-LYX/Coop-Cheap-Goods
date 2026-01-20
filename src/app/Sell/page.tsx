@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/component/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Upload, X } from "lucide-react";
+import { CATEGORIES } from "@/component/CategoryBar";
 
 export default function SellPage() {
   const { user, supabase, loading } = useAuth();
@@ -25,16 +26,8 @@ export default function SellPage() {
   const [condition, setCondition] = useState("");
   const [color, setColor] = useState("");
 
-  const categories = [
-    "Clothing",
-    "Electronics",
-    "Sports & Outdoor",
-    "Home & Kitchen",
-    "Books",
-    "Beauty & Health",
-    "Toys & Games",
-    "Other",
-  ];
+  // Use labels from CategoryBar to keep categories in sync
+  const categories = CATEGORIES.map((cat) => cat.label);
 
   // Depop-style dropdown options
   const clothingBrands = [

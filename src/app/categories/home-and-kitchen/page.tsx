@@ -8,6 +8,7 @@ import HomeKitchenFilters, {
   HomeKitchenFilterState,
 } from "@/component/HomeKitchenFilters";
 import { createClient } from "@/utils/supabase/client";
+import Breadcrumb from "@/component/Breadcrumb";
 
 export default function HomeKitchenPage() {
   const [filters, setFilters] = useState<HomeKitchenFilterState>({
@@ -66,6 +67,7 @@ export default function HomeKitchenPage() {
   return (
     <main>
       <Navbar />
+      <CategoryBar />
       <div className="flex">
         <HomeKitchenFilters
           onFilterChange={handleFilterChange}
@@ -73,6 +75,7 @@ export default function HomeKitchenPage() {
         />
         <div className="flex-1">
           <div className="px-4 py-6">
+            <Breadcrumb items={[{ label: "Home & Kitchen" }]} />
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Home & Kitchen</h1>
             <MarketplaceGrid category="Home & Kitchen" homeKitchenFilters={filters} />
           </div>
