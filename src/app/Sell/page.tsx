@@ -195,7 +195,7 @@ export default function SellPage() {
     <main className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-black text-3xl font-bold mb-2">List an item</h1>
         <p className="text-gray-600 mb-8">Fill in the details below</p>
 
