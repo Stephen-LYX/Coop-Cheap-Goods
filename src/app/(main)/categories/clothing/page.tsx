@@ -29,7 +29,7 @@ export default function ClothingPage() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
-        .from("clothing_items")
+        .from("filters_clothing")
         .select("brand, size, color, condition");
 
       if (error) {

@@ -23,7 +23,7 @@ export default function GardenOutdoorPage() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
-        .from("garden_and_outdoor_items")
+        .from("items_garden_and_outdoor")
         .select("condition");
       if (error) {
         console.error("Error fetching filter options:", error);

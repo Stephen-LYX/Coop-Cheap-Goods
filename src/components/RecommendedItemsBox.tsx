@@ -31,7 +31,7 @@ export default function RecommendedItemsBox() {
     try {
       // Fetch random items from the database
       const { data, error } = await supabase
-        .from("all_items")
+        .from("items")
         .select("*")
         .order("id", { ascending: false })
         .limit(20);

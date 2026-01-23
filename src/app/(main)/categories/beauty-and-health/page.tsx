@@ -23,7 +23,7 @@ export default function BeautyHealthPage() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
-        .from("beauty_and_health_items")
+        .from("items_beauty_and_health")
         .select("condition");
 
       if (error) {
@@ -32,9 +32,6 @@ export default function BeautyHealthPage() {
       }
 
       if (data) {
-        const brands = [
-          ...new Set(data.map((item) => item.brand).filter(Boolean)),
-        ] as string[];
         const conditions = [
           ...new Set(data.map((item) => item.condition).filter(Boolean)),
         ] as string[];

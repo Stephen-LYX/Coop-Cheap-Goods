@@ -25,7 +25,7 @@ export default function ElectronicsPage() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
-        .from("electronics_items")
+        .from("items_electronics")
         .select("brand, condition");
 
       if (error) {

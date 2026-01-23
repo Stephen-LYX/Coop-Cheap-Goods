@@ -25,7 +25,7 @@ export default function MusicalInstrumentsPage() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
-        .from("musical_instruments_items")
+        .from("items_musical_instruments")
         .select("brand, condition");
 
       if (error) {

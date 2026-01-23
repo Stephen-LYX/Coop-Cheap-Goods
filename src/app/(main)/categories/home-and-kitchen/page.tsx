@@ -23,7 +23,7 @@ export default function HomeKitchenPage() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
-        .from("home_and_kitchen_items")
+        .from("items_home_and_kitchen")
         .select("condition");
 
       if (error) {

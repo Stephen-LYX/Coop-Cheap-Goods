@@ -72,38 +72,42 @@ const MarketplaceGrid = ({
   const fetchItems = async () => {
     setLoading(true);
     try {
-      let query;
+      const { data: item } = await supabase
+        .from("items")
+        .select(
+          "*, filters_other(condition), filters_books(condition), filters_beauty_and_health(condition), filters_electronics(brand,condition), filters_home_and_kitchen(condition), filters_garden_and_outdoor(condition), filters_musical_instruments(condition, brand), filters_clothing(brand,size,color,condition)",
+        );
+      console.log(item);
+
+      let query = supabase.from("items").select("*");
 
       if (category) {
         switch (category) {
           case "Other":
-            query = supabase.from("other_items").select("*");
+            query = supabase.from("items_other").select("*");
             break;
           case "Clothing":
-            query = supabase.from("clothing_items").select("*");
+            query = supabase.from("items_clothing").select("*");
             break;
           case "Musical Instruments":
-            query = supabase.from("musical_instruments_items").select("*");
+            query = supabase.from("items_musical_instruments").select("*");
             break;
           case "Garden and Outdoor":
-            query = supabase.from("garden_and_outdoor_items").select("*");
+            query = supabase.from("items_garden_and_outdoor").select("*");
             break;
           case "Beauty and Health":
-            query = supabase.from("beauty_and_health_items").select("*");
+            query = supabase.from("items_beauty_and_health").select("*");
             break;
           case "Home and Kitchen":
-            query = supabase.from("home_and_kitchen_items").select("*");
+            query = supabase.from("items_home_and_kitchen").select("*");
             break;
           case "Electronics":
-            query = supabase.from("electronics_items").select("*");
+            query = supabase.from("items_electronics").select("*");
             break;
           case "Books":
-            query = supabase.from("books_items").select("*");
+            query = supabase.from("items_books").select("*");
             break;
         }
-      } else {
-        //"all_items" is a view of all items from the different categories
-        query = supabase.from("all_items").select("*");
       }
 
       // Combine all filter types into one

@@ -23,7 +23,7 @@ export default function OtherPage() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
-        .from("other_items")
+        .from("items_other")
         .select("condition");
 
       if (error) {

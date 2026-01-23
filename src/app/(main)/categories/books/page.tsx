@@ -23,7 +23,7 @@ export default function BooksPage() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       const { data, error } = await supabase
-        .from("books_items")
+        .from("items_books")
         .select("condition");
 
       if (error) {
