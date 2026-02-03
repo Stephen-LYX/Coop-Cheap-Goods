@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {
+    root: 'C:\\Users\\steph\\Documents\\GitHub\\Coop-Cheap-Goods',
+  },
   images: {
     remotePatterns: [
       {
