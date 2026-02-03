@@ -26,7 +26,7 @@ export function BreadCrumbs({ title }: { title: string }) {
       <ol className="inline-flex items-center space-x-1 rtl:space-x-reverse">
         <li className="inline-flex items-center">
           <Link
-            href="/home"
+            href="/"
             className="inline-flex items-center text-sm font-medium text-body hover:text-blue-700"
           >
             <svg

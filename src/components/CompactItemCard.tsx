@@ -53,6 +53,11 @@ function CompactItemCard({ item }: CompactItemCardProperty) {
     if (imageError) return placeholderImage
     if (!item.image) return placeholderImage
 
+    // If it's already a full URL (http:// or https://), use it as is
+    if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
+      return item.image
+    }
+
     if (item.image.startsWith('/')) return item.image
 
     return `/uploaded/${item.image}`

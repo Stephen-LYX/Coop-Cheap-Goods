@@ -41,7 +41,7 @@ export default function LoginPage() {
         setMessage("Error: " + error.message);
       } else {
         setMessage("Login successful! Welcome " + data.user.email);
-        router.push("/home");
+        router.push("/");
       }
     } catch (err: unknown) {
       console.error("Login network error:", err);
@@ -95,7 +95,7 @@ export default function LoginPage() {
           setMessage(
             "Account created. Check email to confirm or you'll be redirected.",
           );
-          router.push("/Home");
+          router.push("/");
         }
       }
     } catch (err: unknown) {
