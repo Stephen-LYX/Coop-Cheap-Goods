@@ -6,7 +6,10 @@
       "Bash(done)",
       "Bash(for file in src/component/RecommendedItemsBox.tsx src/component/FavoritedItemsBox.tsx src/component/RecentlyViewedBox.tsx)",
       "Bash(for file in src/component/*Filters.tsx)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
