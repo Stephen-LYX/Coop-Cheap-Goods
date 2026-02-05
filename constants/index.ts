@@ -1,6 +1,7 @@
 // NAVIGATION - Updated for eBay-style navbar
 export const NAV_LINKS = [
   { href: '/sell', key: 'sell', label: 'Sell'},
+  { href: '/coop', key: 'coop', label: 'Coops'},
   { href: '/favorites', key: 'favorites', label: 'Favorites'},
   { href: '/inbox', key: 'inbox', label: 'Inbox'},
   { href: '/notifications', key: 'notifications', label: 'Notifications' },
