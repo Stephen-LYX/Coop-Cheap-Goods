@@ -44,7 +44,7 @@ export default async function Item({
 
     //get item from database
     const { data: item } = await supabase
-      .from("items_other") // select from other_items table
+      .from("items_books") // select from other_items table
       .select() // select all columns
       .eq("id", itemID) // where the item id = itemID
       .single() // return data as a single object
@@ -122,9 +122,9 @@ export default async function Item({
                 Category:{" "}
                 <Link
                   className="hover:text-blue-700"
-                  href={`/categories/other`}
+                  href={`/categories/books`}
                 >
-                  Other
+                  Books
                 </Link>
               </p>
               <Link
