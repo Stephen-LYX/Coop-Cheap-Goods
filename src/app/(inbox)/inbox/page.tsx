@@ -357,13 +357,10 @@ export default function InboxPage() {
         .lte("scheduled_for", now)
         .order("scheduled_for", { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code !== "PGRST116") {
-          // Not "no rows" error
-          console.error("Error checking notifications:", error);
-        }
+        console.error("Error checking notifications:", error.message ?? error);
         return;
       }
 
