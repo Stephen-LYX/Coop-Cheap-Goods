@@ -72,13 +72,6 @@ const MarketplaceGrid = ({
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const { data: item } = await supabase
-        .from("items")
-        .select(
-          "*, filters_other(condition), filters_books(condition), filters_beauty_and_health(condition), filters_electronics(brand,condition), filters_home_and_kitchen(condition), filters_garden_and_outdoor(condition), filters_musical_instruments(condition, brand), filters_clothing(brand,size,color,condition)",
-        );
-      console.log(item);
-
       let query = supabase.from("items").select("*");
 
       if (category) {
