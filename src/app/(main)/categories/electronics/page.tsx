@@ -37,9 +37,6 @@ export default function ElectronicsPage() {
         const brands = [
           ...new Set(data.map((item) => item.brand).filter(Boolean)),
         ] as string[];
-        const colors = [
-          ...new Set(data.map((item) => item.color).filter(Boolean)),
-        ] as string[];
         const conditions = [
           ...new Set(data.map((item) => item.condition).filter(Boolean)),
         ] as string[];
