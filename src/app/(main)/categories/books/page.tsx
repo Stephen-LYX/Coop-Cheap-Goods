@@ -32,9 +32,6 @@ export default function BooksPage() {
       }
 
       if (data) {
-        const brands = [
-          ...new Set(data.map((item) => item.brand).filter(Boolean)),
-        ] as string[];
         const conditions = [
           ...new Set(data.map((item) => item.condition).filter(Boolean)),
         ] as string[];
