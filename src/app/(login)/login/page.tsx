@@ -23,13 +23,8 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    if (!agreed) {
-      setMessage(
-        "You must agree to the Terms and Conditions before logging in.",
-      );
-      setLoading(false);
-      return;
-    }
+    // agreement is only required when creating a new account
+    // (user already has an account so we don't block them here)
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -324,24 +319,26 @@ export default function LoginPage() {
                     className="rounded-lg border border-gray-300 px-4 py-3 text-base text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
 
-                  <label className="flex items-start gap-2 text-sm text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={agreed}
-                      onChange={(e) => setAgreed(e.target.checked)}
-                      className="mt-1"
-                    />
-                    <span>
-                      I agree to the{" "}
-                      <a
-                        href="/terms"
-                        target="_blank"
-                        className="text-blue-600 hover:underline"
-                      >
-                        Terms and Conditions
-                      </a>
-                    </span>
-                  </label>
+                  {isSignUp && (
+                    <label className="flex items-start gap-2 text-sm text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={agreed}
+                        onChange={(e) => setAgreed(e.target.checked)}
+                        className="mt-1"
+                      />
+                      <span>
+                        I agree to the{" "}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Terms and Conditions
+                        </a>
+                      </span>
+                    </label>
+                  )}
 
                   <button
                     type="submit"
