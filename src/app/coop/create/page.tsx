@@ -60,7 +60,7 @@ export default function CreateCoopPage() {
           setIsSubmitting(false);
           return;
         }
-        imageUrl = uploadData.filename;
+        imageUrl = uploadData.url;
       }
 
       // Create the coop

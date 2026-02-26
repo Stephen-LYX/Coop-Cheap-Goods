@@ -102,7 +102,7 @@ export default async function Item({
             <div className="flex-auto max-w-full md:w-100 md:mr-4">
               <div className={"aspect-square overflow-hidden"}>
                 <Image
-                  src={`/uploaded/${item.image_url}`}
+                  src={item.image_url?.startsWith('http') ? item.image_url : `/uploaded/${item.image_url}`}
                   alt={item.title}
                   width={800}
                   height={800}

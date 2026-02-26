@@ -221,7 +221,7 @@ export default function ProfilePage() {
     const data = await res.json();
 
     if (!res.ok) throw new Error(data.error || "Upload failed");
-    return `/uploaded/${data.filename}`;
+    return data.url;
   };
 
   const handleSave = async () => {

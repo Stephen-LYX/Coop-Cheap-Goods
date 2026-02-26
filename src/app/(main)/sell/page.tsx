@@ -131,7 +131,7 @@ export default function SellPage() {
         setIsSubmitting(false);
         return;
       }
-      uploadedUrls.push(uploadData.filename);
+      uploadedUrls.push(uploadData.url);
     }
 
     const {
