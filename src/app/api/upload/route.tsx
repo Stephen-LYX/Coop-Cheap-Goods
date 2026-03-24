@@ -60,6 +60,7 @@ export const POST = async (req: Request) => {
     return NextResponse.json({ url: publicUrl });
   } catch (err: unknown) {
     console.error(err);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 };
