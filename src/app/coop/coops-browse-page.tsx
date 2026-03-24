@@ -27,23 +27,8 @@ export default function CoopsPage() {
   const [allCoops, setAllCoops] = useState<Coop[]>([]);
   const [userCoops, setUserCoops] = useState<UserCoop[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"my-coops" | "discover">("my-coops");
-
-  const categories = [
-    "All",
-    "Clothing",
-    "Electronics",
-    "Furniture",
-    "Books",
-    "Sports & Outdoors",
-    "Toys & Games",
-    "Home & Garden",
-    "Automotive",
-    "Music & Instruments",
-    "Other",
-  ];
 
   useEffect(() => {
     if (user) {
@@ -96,14 +81,9 @@ export default function CoopsPage() {
   };
 
   const filteredCoops = (activeTab === "my-coops" ? userCoops : allCoops).filter(
-    (coop) => {
-      const matchesSearch =
-        coop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        coop.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        selectedCategory === "All" || coop.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    }
+    (coop) =>
+      coop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      coop.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const CoopCard = ({ coop, role }: { coop: Coop; role?: string }) => (
@@ -154,9 +134,6 @@ export default function CoopsPage() {
           <span className="flex items-center gap-1 text-gray-500">
             <Users size={14} />
             {coop.member_count} {coop.member_count === 1 ? "member" : "members"}
-          </span>
-          <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
-            {coop.category}
           </span>
         </div>
       </div>
@@ -232,22 +209,6 @@ export default function CoopsPage() {
             />
           </div>
 
-          {/* Category Filter */}
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  selectedCategory === category
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Coops Grid */}

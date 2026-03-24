@@ -212,9 +212,6 @@ export default function CoopPage() {
                       <Users size={16} />
                       {coop.member_count} {coop.member_count === 1 ? "member" : "members"}
                     </span>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                      {coop.category}
-                    </span>
                   </div>
                 </div>
 
