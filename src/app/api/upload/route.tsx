@@ -52,7 +52,7 @@ export const POST = async (req: Request) => {
 
     if (uploadError) {
       console.error(uploadError);
-      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+      return NextResponse.json({ error: uploadError.message }, { status: 500 });
     }
 
     const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(filename);
