@@ -27,7 +27,7 @@ type Conversation = {
   last_message_at?: string | null;
   buyer?: User;
   seller?: User;
-  item?: { title?: string; image_url?: string };
+  item?: { title?: string; image_url?: string; price?: number };
   other_user?: {
     id: string;
     username?: string;
@@ -252,16 +252,19 @@ export default function InboxPage() {
       if (itemIds.length > 0) {
         const { data: itemsData, error: itemsError } = await supabase
           .from("items")
-          .select("id, title")
+          .select("id, title, price")
           .in("id", itemIds);
 
         if (itemsError) {
           logError("Error fetching item titles:", itemsError);
         } else if (itemsData) {
-          const itemMap = new Map<number, { title?: string }>();
+          const itemMap = new Map<number, { title?: string; price?: number }>();
           itemsData.forEach((item: any) => {
             if (item && typeof item.id === "number") {
-              itemMap.set(item.id, { title: item.title as string | undefined });
+              itemMap.set(item.id, {
+                title: item.title as string | undefined,
+                price: typeof item.price === "number" ? item.price : undefined,
+              });
             }
           });
 
@@ -367,6 +370,8 @@ export default function InboxPage() {
         return;
       }
 
+      const currentUserId = user.id;
+
       const { data, error } = await supabase
         .from("messages")
         .select("*, sender:profiles!sender_id(username, full_name)")
@@ -385,13 +390,13 @@ export default function InboxPage() {
       }
 
       const convOtherUserId =
-        conversation.buyer_id === user.id
+        conversation.buyer_id === currentUserId
           ? conversation.seller_id
           : conversation.buyer_id;
 
       async function deriveKey(fallbackOtherUserId?: string) {
         const otherId = fallbackOtherUserId ?? convOtherUserId;
-        return ensureConversationKey(conversationId, user.id, otherId);
+        return ensureConversationKey(conversationId, currentUserId, otherId);
       }
 
       let encryptionKey: string | null = null;
@@ -412,7 +417,7 @@ export default function InboxPage() {
               const senderId = mRecord.sender_id as string | undefined;
               const messageReceiverId = mRecord.receiver_id as string | undefined;
               const otherFromMessage =
-                senderId && senderId !== user.id ? senderId : messageReceiverId;
+                senderId && senderId !== currentUserId ? senderId : messageReceiverId;
               if (otherFromMessage) {
                 try {
                   keyToUse = await deriveKey(otherFromMessage);
@@ -755,9 +760,19 @@ export default function InboxPage() {
                         selectedConversation.other_user?.full_name ??
                         "Unknown User"}
                     </h2>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 whitespace-pre-line">
                       {selectedConversation.item?.title
-                        ? `About: ${selectedConversation.item.title}`
+                        ? (() => {
+                            const price = selectedConversation.item?.price;
+                            const priceLabel =
+                              typeof price === "number"
+                                ? ` — $${price.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}`
+                                : "";
+                            return `About: ${selectedConversation.item.title}${priceLabel}`;
+                          })()
                         : selectedConversation.item_id
                           ? `About: Item #${selectedConversation.item_id}`
                           : "General conversation"}
