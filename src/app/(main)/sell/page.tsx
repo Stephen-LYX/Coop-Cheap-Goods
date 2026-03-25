@@ -167,19 +167,7 @@ export default function SellPage() {
       setMessage("Error: " + error.message);
       setIsSubmitting(false);
     } else {
-      setMessage("Item listed successfully!");
-      setTitle("");
-      setDescription("");
-      setPrice("");
-      setCategory("");
-      setImages([]);
-      setImagePreviews([]);
-      setBrand("");
-      setSize("");
-      setCondition("");
-      setColor("");
-      setIsSubmitting(false);
-      router.push("/home");
+      router.push("/");
     }
   };
 
