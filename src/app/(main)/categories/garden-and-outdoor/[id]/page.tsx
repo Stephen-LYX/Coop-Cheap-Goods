@@ -128,7 +128,7 @@ export default async function Item({
                 </Link>
               </p>
               <Link
-                href="/inbox"
+                href={`/inbox?sellerId=${item.user_id}&itemId=${itemID}`}
                 className="block text-center text-white bg-blue-600 box-border border border-transparent hover:bg-blue-700 focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded px-4 py-2.5 my-4 focus:outline-none"
               >
                 Message Seller

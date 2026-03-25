@@ -3,9 +3,9 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/lib/supabaseClient";
-import { IoIosSearch, IoMdSend, IoMdCalendar } from "react-icons/io";
+import { IoIosSearch, IoMdSend, IoMdCalendar, IoMdTrash } from "react-icons/io";
 import { encryptMessage, decryptMessage } from "@/lib/encryption";
 import { ensureConversationKey } from "@/lib/keyManagement";
 import MeetingScheduler from "@/components/inbox/MeetingScheduler";
@@ -63,12 +63,24 @@ type TransactionNotification = {
   buyer?: { username?: string; full_name?: string };
 };
 
+const logError = (label: string, err: unknown) => {
+  if (err instanceof Error) {
+    console.error(label, err.message, err.stack ?? err);
+  } else {
+    console.error(label, err);
+  }
+};
+
 export default function InboxPage() {
   const { user, loading } = useAuth() as {
     user: User | null;
     loading: boolean;
   };
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const bootstrapStarted = useRef(false);
+  const sellerIdParam = searchParams.get("sellerId");
+  const itemIdParam = searchParams.get("itemId");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
@@ -82,6 +94,22 @@ export default function InboxPage() {
     useState<TransactionNotification | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
+  function hideConversation(convId: string) {
+    setConversations((prev) => prev.filter((c) => c.id !== convId));
+    if (selectedConversation?.id === convId) {
+      setSelectedConversation(null);
+      setMessages([]);
+    }
+  }
+
+  function confirmHideConversation(conv: Conversation) {
+    const label = conv.item?.title
+      ? `Delete "${conv.item.title}" chat from your view?`
+      : "Delete this chat from your view?";
+    const confirmed = window.confirm(`${label} This will not delete the messages.`);
+    if (confirmed) hideConversation(conv.id);
+  }
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
@@ -92,6 +120,42 @@ export default function InboxPage() {
       checkPendingNotifications();
     }
   }, [user, loading]);
+
+  // After conversations load, auto-select the matching seller/item conversation if arriving from "Message Seller"
+  useEffect(() => {
+    if (!user || !conversations.length || !sellerIdParam) return;
+    if (selectedConversation) return; // respect an existing selection
+
+    const normalizedItemId = itemIdParam ? Number(itemIdParam) : null;
+    const match = conversations.find((c) => {
+      const isSellerMatch = c.seller_id === sellerIdParam && c.buyer_id === user.id;
+      const itemMatch = normalizedItemId === null
+        ? c.item_id === null || c.item_id === undefined
+        : Number(c.item_id) === normalizedItemId;
+      return isSellerMatch && itemMatch;
+    });
+
+    if (match) {
+      setSelectedConversation(match);
+    }
+  }, [conversations, sellerIdParam, itemIdParam, selectedConversation, user]);
+
+  // If user clicked "Message Seller" from an item page, bootstrap/find/create a conversation
+  useEffect(() => {
+    const sellerId = sellerIdParam;
+    if (!user || loading || !sellerId || bootstrapStarted.current) return;
+    if (user.id === sellerId) return; // don't create self-conversations
+
+    bootstrapStarted.current = true;
+    const itemId = itemIdParam ?? undefined;
+
+    (async () => {
+      const conv = await findOrCreateConversation(sellerId, itemId);
+      if (conv) {
+        setSelectedConversation(conv);
+      }
+    })();
+  }, [user, loading, sellerIdParam, itemIdParam]);
 
   useEffect(() => {
     if (!selectedConversation) return;
@@ -119,7 +183,11 @@ export default function InboxPage() {
         },
         (payload: { new: Message }) => {
           const newMsg = payload.new;
-          setMessages((prev) => [...prev, newMsg]);
+          // Append only if this message isn't already in state (avoids double-adding our own sends)
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
+          });
         },
       )
       .subscribe();
@@ -137,15 +205,14 @@ export default function InboxPage() {
         .select(
           `
           *,
-          buyer:profiles!buyer_id(*),
-          seller:profiles!seller_id(*),
-          item:items(title, image_url)
+          buyer:profiles!conversations_buyer_id_fkey(*),
+          seller:profiles!conversations_seller_id_fkey(*)
         `,
         )
         .or(`buyer_id.eq.${user?.id},seller_id.eq.${user?.id}`)
         .order("last_message_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) throw new Error(error.message ?? "Unknown fetch error", { cause: error });
 
       const convs = (data || []) as unknown[];
 
@@ -172,64 +239,200 @@ export default function InboxPage() {
           } as Conversation;
         }),
       );
+      // Attach item titles in a single query to avoid unknown FK join
+      const itemIds = Array.from(
+        new Set(
+          annotated
+            .map((c) => (c.item_id !== null && c.item_id !== undefined ? Number(c.item_id) : null))
+            .filter((id): id is number => id !== null && !Number.isNaN(id)),
+        ),
+      );
 
-      setConversations(annotated);
+      let annotatedWithItems = annotated;
+      if (itemIds.length > 0) {
+        const { data: itemsData, error: itemsError } = await supabase
+          .from("items")
+          .select("id, title")
+          .in("id", itemIds);
+
+        if (itemsError) {
+          logError("Error fetching item titles:", itemsError);
+        } else if (itemsData) {
+          const itemMap = new Map<number, { title?: string }>();
+          itemsData.forEach((item: any) => {
+            if (item && typeof item.id === "number") {
+              itemMap.set(item.id, { title: item.title as string | undefined });
+            }
+          });
+
+          annotatedWithItems = annotated.map((c) => {
+            const itemIdNum = c.item_id !== undefined && c.item_id !== null ? Number(c.item_id) : null;
+            if (itemIdNum !== null && itemMap.has(itemIdNum)) {
+              return {
+                ...c,
+                item: {
+                  ...(c.item ?? {}),
+                  ...itemMap.get(itemIdNum),
+                },
+              } as Conversation;
+            }
+            return c;
+          });
+        }
+      }
+
+      setConversations(annotatedWithItems);
+      return annotatedWithItems;
     } catch (err) {
-      console.error("Error fetching conversations:", err);
+      logError("Error fetching conversations:", err);
     } finally {
       setLoadingConversations(false);
+    }
+  }
+
+  async function findOrCreateConversation(
+    sellerId: string,
+    itemId?: string,
+  ): Promise<Conversation | null> {
+    if (!user) return null;
+
+    try {
+      const normalizedItemId = itemId ? Number(itemId) : null;
+
+      let existingQuery = supabase
+        .from("conversations")
+        .select(
+          `
+          *,
+          buyer:profiles!conversations_buyer_id_fkey(*),
+          seller:profiles!conversations_seller_id_fkey(*)
+        `,
+        )
+        .eq("buyer_id", user.id)
+        .eq("seller_id", sellerId)
+        .order("last_message_at", { ascending: false })
+        .limit(1);
+
+      if (normalizedItemId === null) {
+        existingQuery = existingQuery.is("item_id", null);
+      } else {
+        existingQuery = existingQuery.eq("item_id", normalizedItemId);
+      }
+
+      const { data: existing, error: existingError } = await existingQuery
+        .maybeSingle();
+
+      if (existingError)
+        throw new Error(existingError.message ?? "Query error", { cause: existingError });
+      if (existing) {
+        return existing as Conversation;
+      }
+
+      const { data: created, error: insertError } = await supabase
+        .from("conversations")
+        .insert({
+          buyer_id: user.id,
+          seller_id: sellerId,
+          item_id: normalizedItemId,
+          last_message: null,
+          last_message_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select(
+          `
+          *,
+          buyer:profiles!conversations_buyer_id_fkey(*),
+          seller:profiles!conversations_seller_id_fkey(*)
+        `,
+        )
+        .single();
+
+      if (insertError)
+        throw new Error(insertError.message ?? "Insert error", { cause: insertError });
+
+      const refreshed = await fetchConversations();
+      const annotated = refreshed?.find((c) => c.id === created?.id);
+      return (annotated || created) as Conversation;
+    } catch (err) {
+      logError("Error bootstrapping conversation:", err);
+      return null;
     }
   }
 
   async function fetchMessages(conversationId: string) {
     setLoadingMessages(true);
     try {
-      const { data, error } = await supabase
-        .from("messages")
-        .select(
-          `
-          *,
-          sender:profiles!sender_id(username, full_name)
-        `,
-        )
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-
-      // Get encryption key for this conversation
-      const conversation = conversations.find((c) => c.id === conversationId);
-      if (!conversation || !user) {
+      if (!user) {
         setMessages([]);
         return;
       }
 
-      const otherUserId =
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*, sender:profiles!sender_id(username, full_name)")
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: true });
+
+      if (error)
+        throw new Error(error.message ?? "Fetch error", { cause: error });
+
+      const conversation =
+        conversations.find((c) => c.id === conversationId) || selectedConversation;
+
+      if (!conversation) {
+        setMessages((data || []) as Message[]);
+        return;
+      }
+
+      const convOtherUserId =
         conversation.buyer_id === user.id
           ? conversation.seller_id
           : conversation.buyer_id;
 
-      const encryptionKey = await ensureConversationKey(
-        conversationId,
-        user.id,
-        otherUserId,
-      );
+      async function deriveKey(fallbackOtherUserId?: string) {
+        const otherId = fallbackOtherUserId ?? convOtherUserId;
+        return ensureConversationKey(conversationId, user.id, otherId);
+      }
 
-      // Decrypt messages
+      let encryptionKey: string | null = null;
+      try {
+        encryptionKey = await deriveKey();
+      } catch (keyErr) {
+        logError("Error deriving encryption key (primary):", keyErr);
+      }
+
       const mapped: Message[] = await Promise.all(
         (data || []).map(async (m: unknown) => {
           const mRecord = m as Record<string, unknown>;
           let decryptedContent = mRecord.content as string;
 
-          // Try to decrypt the message
           try {
+            let keyToUse = encryptionKey;
+            if (!keyToUse) {
+              const senderId = mRecord.sender_id as string | undefined;
+              const messageReceiverId = mRecord.receiver_id as string | undefined;
+              const otherFromMessage =
+                senderId && senderId !== user.id ? senderId : messageReceiverId;
+              if (otherFromMessage) {
+                try {
+                  keyToUse = await deriveKey(otherFromMessage);
+                } catch (fallbackErr) {
+                  logError("Error deriving fallback key:", fallbackErr);
+                }
+              }
+            }
+
+            if (!keyToUse) throw new Error("Missing encryption key");
+
             decryptedContent = await decryptMessage(
               mRecord.content as string,
-              encryptionKey,
+              keyToUse,
             );
           } catch (err) {
-            // If decryption fails, it might be a plain text message (migration scenario)
-            console.warn("Could not decrypt message, using plain text:", err);
+            logError(
+              "Could not decrypt message, falling back to stored content:",
+              err,
+            );
             decryptedContent = mRecord.content as string;
           }
 
@@ -247,7 +450,7 @@ export default function InboxPage() {
 
       setMessages(mapped);
     } catch (err) {
-      console.error("Error fetching messages:", err);
+      logError("Error fetching messages:", err);
     } finally {
       setLoadingMessages(false);
     }
@@ -285,13 +488,14 @@ export default function InboxPage() {
           receiver_id: receiverId,
           content: encryptedContent, // Store encrypted content
           message_type: "text",
+          created_at: new Date().toISOString(),
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      // Add decrypted message to local state
+      // Add decrypted message to local state (append, do not replace history)
       const newMsg: Message = {
         ...data,
         content: messageContent, // Display decrypted content
@@ -309,9 +513,21 @@ export default function InboxPage() {
         .eq("id", selectedConversation.id);
 
       setNewMessage("");
-      fetchConversations();
+
+      // Optimistically update conversations list to avoid sidebar refresh flash
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === selectedConversation.id
+            ? {
+                ...c,
+                last_message: messageContent,
+                last_message_at: new Date().toISOString(),
+              }
+            : c,
+        ),
+      );
     } catch (err) {
-      console.error("Error sending message:", err);
+      logError("Error sending message:", err);
     }
   }
 
@@ -348,8 +564,9 @@ export default function InboxPage() {
         .select(
           `
           *,
-          item:items(id, title),
-          buyer:profiles!buyer_id(username, full_name)
+          buyer:profiles!transaction_notifications_buyer_id_fkey(username, full_name),
+          seller:profiles!transaction_notifications_seller_id_fkey(username, full_name),
+          conversation:conversations!transaction_notifications_conversation_id_fkey(*)
         `,
         )
         .eq("seller_id", user.id)
@@ -360,7 +577,7 @@ export default function InboxPage() {
         .maybeSingle();
 
       if (error) {
-        console.error("Error checking notifications:", error.message ?? error);
+        logError("Error checking notifications:", error);
         return;
       }
 
@@ -368,7 +585,7 @@ export default function InboxPage() {
         setPendingNotification(data as TransactionNotification);
       }
     } catch (err) {
-      console.error("Error in checkPendingNotifications:", err);
+      logError("Error in checkPendingNotifications:", err);
     }
   }
 
@@ -387,11 +604,11 @@ export default function InboxPage() {
     const term = searchTerm.toLowerCase();
     const username = conv.other_user?.username ?? "";
     const full = conv.other_user?.full_name ?? "";
-    const title = conv.item?.title ?? "";
+    const itemLabel = conv.item_id ? `item #${conv.item_id}` : "";
     return (
       username.toLowerCase().includes(term) ||
       full.toLowerCase().includes(term) ||
-      title.toLowerCase().includes(term)
+      itemLabel.toLowerCase().includes(term)
     );
   });
 
@@ -403,7 +620,7 @@ export default function InboxPage() {
     );
 
   return (
-    <main className="flex flex-col h-screen bg-gray-50">
+    <main className="flex flex-col bg-gray-50 min-h-0 h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] overflow-hidden">
       {/* Notification Modal */}
       {pendingNotification && (
         <NotificationModal
@@ -415,9 +632,9 @@ export default function InboxPage() {
         />
       )}
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Sidebar - Conversations List */}
-        <div className="w-96 bg-white border-r-2 border-gray-300 flex flex-col shadow-md">
+        <div className="w-96 bg-white border-r-2 border-gray-300 flex flex-col shadow-md min-h-0">
           <div className="px-6 py-5 border-b-2 border-gray-300 bg-linear-to-r from-blue-50 to-indigo-50">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">Messages</h1>
 
@@ -432,7 +649,7 @@ export default function InboxPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto min-h-0">
             {loadingConversations ? (
               <div className="flex items-center justify-center h-32">
                 <div className="text-gray-400 text-sm">
@@ -444,7 +661,7 @@ export default function InboxPage() {
                 {filtered.map((conv) => (
                   <div
                     key={conv.id}
-                    className={`flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 ${
+                    className={`flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 relative ${
                       selectedConversation?.id === conv.id
                         ? "bg-blue-50 border-l-4 border-blue-600"
                         : "border-l-4 border-transparent"
@@ -461,14 +678,9 @@ export default function InboxPage() {
                         height={56}
                         className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100"
                       />
-                      {conv.unread_count && conv.unread_count > 0 && (
-                        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg">
-                          {conv.unread_count}
-                        </div>
-                      )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 pr-10">
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="font-semibold text-gray-900 truncate text-sm">
                           {conv.other_user?.username ??
@@ -489,12 +701,27 @@ export default function InboxPage() {
                         {conv.last_message ?? "No messages yet"}
                       </p>
 
-                      {conv.item && (
-                        <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
-                          <span className="truncate">📦 {conv.item.title}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
+                        <span className="truncate">
+                          {conv.item?.title
+                            ? `📦 ${conv.item.title}`
+                            : conv.item_id
+                              ? `📦 Item #${conv.item_id}`
+                              : "General chat"}
+                        </span>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmHideConversation(conv);
+                      }}
+                      aria-label="Hide conversation"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
+                    >
+                      <IoMdTrash className="text-lg" />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -507,7 +734,7 @@ export default function InboxPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col bg-gray-50">
+        <div className="flex-1 min-h-0 flex flex-col bg-gray-50">
           <div className="h-20 px-6 bg-white border-b border-gray-200 flex items-center justify-between shadow-sm">
             {selectedConversation ? (
               <>
@@ -528,14 +755,13 @@ export default function InboxPage() {
                         selectedConversation.other_user?.full_name ??
                         "Unknown User"}
                     </h2>
-                    {selectedConversation.item && (
-                      <p className="text-sm text-gray-500">
-                        About:{" "}
-                        <span className="text-blue-600 font-medium">
-                          {selectedConversation.item.title}
-                        </span>
-                      </p>
-                    )}
+                    <p className="text-sm text-gray-500">
+                      {selectedConversation.item?.title
+                        ? `About: ${selectedConversation.item.title}`
+                        : selectedConversation.item_id
+                          ? `About: Item #${selectedConversation.item_id}`
+                          : "General conversation"}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -557,7 +783,7 @@ export default function InboxPage() {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 pb-28">
             {selectedConversation ? (
               loadingMessages ? (
                 <div className="flex items-center justify-center h-full">
@@ -628,7 +854,7 @@ export default function InboxPage() {
           </div>
 
           {selectedConversation && (
-            <div className="p-6 bg-white border-t-2 border-gray-300 shadow-lg">
+            <div className="p-6 bg-white border-t-2 border-gray-300 shadow-lg sticky bottom-0 left-0 right-0">
               <div className="flex items-center gap-3">
                 <input
                   value={newMessage}
@@ -669,6 +895,7 @@ export default function InboxPage() {
               }
               sellerId={selectedConversation.seller_id}
               buyerId={selectedConversation.buyer_id}
+              onClose={() => setShowScheduler(false)}
             />
           </div>
         )}

@@ -14,8 +14,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    /* Keep text dark even in dark-scheme browsers to avoid washed-out item card text */
     --background: #ffffff;
-    --foreground: #ededed;
+    --foreground: #171717;
   }
 }
 

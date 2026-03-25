@@ -24,6 +24,7 @@ interface MeetingSchedulerProps {
   itemId?: number | null;
   sellerId?: string;
   buyerId?: string;
+  onClose?: () => void;
 }
 
 export default function MeetingScheduler({
@@ -33,6 +34,7 @@ export default function MeetingScheduler({
   itemId,
   sellerId,
   buyerId,
+  onClose,
 }: MeetingSchedulerProps) {
   const [schedules, setSchedules] = useState<MeetingSchedule[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -187,18 +189,29 @@ export default function MeetingScheduler({
   return (
     <div className="h-full flex flex-col bg-gray-50">
       {/* Header */}
-      <div className="px-6 py-5 bg-white border-b-2 border-gray-300">
-        <div className="flex items-center justify-between mb-4">
+      <div className="relative px-6 py-5 bg-white border-b-2 border-gray-300">
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="Close meeting scheduler"
+            className="absolute right-4 top-4 p-2 rounded-full border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 bg-white shadow-sm transition-colors"
+          >
+            <IoMdClose className="text-lg" />
+          </button>
+        )}
+        <div className="flex items-center justify-between mb-4 pr-12">
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <IoMdCalendar className="text-blue-600" />
             Meeting Scheduler
           </h2>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
-            {showForm ? "Cancel" : "Propose Time"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+            >
+              {showForm ? "Cancel" : "Propose Time"}
+            </button>
+          </div>
         </div>
 
         {/* Propose Time Form */}
