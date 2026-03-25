@@ -1,7 +1,7 @@
 // src/app/(inbox)/inbox/page.tsx
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/lib/supabaseClient";
@@ -71,7 +71,7 @@ const logError = (label: string, err: unknown) => {
   }
 };
 
-export default function InboxPage() {
+function InboxPageInner() {
   const { user, loading } = useAuth() as {
     user: User | null;
     loading: boolean;
@@ -916,5 +916,19 @@ export default function InboxPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function InboxPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-screen bg-gray-50">
+          Loading inbox...
+        </div>
+      }
+    >
+      <InboxPageInner />
+    </Suspense>
   );
 }
