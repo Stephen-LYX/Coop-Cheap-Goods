@@ -28,6 +28,10 @@ export default function SellPage() {
   const [condition, setCondition] = useState("");
   const [color, setColor] = useState("");
 
+  // Coop fields
+  const [userCoops, setUserCoops] = useState<{ id: string; name: string }[]>([]);
+  const [selectedCoopId, setSelectedCoopId] = useState("");
+
   // Use labels from CategoryBar to keep categories in sync
   const categories = CATEGORIES.map((cat) => cat.label);
 
@@ -154,12 +158,8 @@ export default function SellPage() {
         image_url: uploadedUrls[0],
         images: uploadedUrls,
         is_active: true,
-        ...(category === "Clothing" && {
-          brand,
-          size,
-          condition,
-          color,
-        }),
+        ...(category === "Clothing" && { brand, size, condition, color }),
+        ...(selectedCoopId && { coop_id: selectedCoopId, is_coop_item: true }),
       },
     ]);
 
@@ -179,6 +179,20 @@ export default function SellPage() {
     };
     checkUser();
   }, [supabase, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchUserCoops = async () => {
+      const { data } = await supabase
+        .from("coop_members")
+        .select("coop_id, coops:coop_id (id, name)")
+        .eq("user_id", user.id);
+      if (data) {
+        setUserCoops(data.map((row: any) => ({ id: row.coops.id, name: row.coops.name })));
+      }
+    };
+    fetchUserCoops();
+  }, [user, supabase]);
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -384,6 +398,28 @@ export default function SellPage() {
                   ))}
                 </select>
               </div>
+            </div>
+          )}
+
+          {/* Coop */}
+          {userCoops.length > 0 && (
+            <div>
+              <label className="text-black block text-lg font-bold mb-2">
+                List in a Coop{" "}
+                <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <select
+                value={selectedCoopId}
+                onChange={(e) => setSelectedCoopId(e.target.value)}
+                className="text-gray-600 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">No coop — list publicly</option>
+                {userCoops.map((coop) => (
+                  <option key={coop.id} value={coop.id}>
+                    {coop.name}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 

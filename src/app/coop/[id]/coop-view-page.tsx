@@ -97,11 +97,13 @@ export default function CoopPage() {
     if (memberData) {
       const { data: itemsData, error: itemsError } = await supabase
         .from("items")
-        .select("id, title, image_url, condition, price, user_id, category, created_at")
+        .select("*")
         .eq("coop_id", id)
         .eq("is_coop_item", true)
         .eq("is_active", true)
         .order("created_at", { ascending: false });
+
+      if (itemsError) console.error("Error fetching coop items:", itemsError);
 
       if (itemsData) {
         // Transform to match ItemCard's Item interface
