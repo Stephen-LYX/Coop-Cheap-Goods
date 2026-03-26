@@ -42,13 +42,17 @@ export default async function Item({
     //test user
     //const user = { id: "00000000-0000-0000-0000-000000000001" };
 
-    //get item from database
-    const { data: item } = await supabase
-      .from("items_beauty_and_health") // select from other_items table
-      .select() // select all columns
-      .eq("id", itemID) // where the item id = itemID
-      .single() // return data as a single object
-      .throwOnError();
+    //get item from database — check generic items table first (new listings), then category table (old listings)
+    let { data: item } = await supabase.from("items").select().eq("id", itemID).maybeSingle();
+    if (!item) {
+      const { data: categoryItem } = await supabase
+        .from("items_beauty_and_health")
+        .select()
+        .eq("id", itemID)
+        .single()
+        .throwOnError();
+      item = categoryItem;
+    }
 
     //get item seller username and avatar_url
     const { data: seller } = await supabase
@@ -150,7 +154,7 @@ export default async function Item({
               <h2 className="font-bold text-heading text-xl">Seller</h2>
               <div className="flex">
                 <Image
-                  src={seller.avatar_url}
+                  src={seller.avatar_url || "/default-avatar.png"}
                   alt=""
                   width={50}
                   height={50}

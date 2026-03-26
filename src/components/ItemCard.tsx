@@ -55,10 +55,10 @@ function ItemCard({ item }: ItemCardProperty) {
       Electronics: "electronics",
       Clothing: "clothing",
       Books: "books",
-      "Home & Kitchen": "home-kitchen",
-      "Beauty & Health": "beauty-health",
-      "Sports & Outdoors": "sports-outdoors",
-      "Toys & Games": "toys-games",
+      "Home & Kitchen": "home-and-kitchen",
+      "Beauty & Health": "beauty-and-health",
+      "Garden & Outdoor": "garden-and-outdoor",
+      "Musical Instruments": "musical-instruments",
       Other: "other",
     };
 
