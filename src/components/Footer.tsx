@@ -55,14 +55,6 @@ const Footer = () => {
                   Favorites
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/notifications"
-                  className="text-sm hover:text-white transition-colors duration-200"
-                >
-                  Notifications
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -142,12 +134,12 @@ const Footer = () => {
             <h3 className="text-white font-semibold mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="/contact"
+                <a
+                  href="mailto:coopcheapgoods@gmail.com"
                   className="text-sm hover:text-white transition-colors duration-200"
                 >
                   Contact Us
-                </Link>
+                </a>
               </li>
               <li>
                 <Link

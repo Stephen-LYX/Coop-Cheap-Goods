@@ -35,8 +35,9 @@ interface CoopMember {
   user_id: string;
   role: "owner" | "moderator" | "member";
   joined_at: string;
-  users?: {
-    email: string;
+  profiles?: {
+    username: string;
+    avatar_url: string | null;
   };
 }
 
@@ -125,7 +126,7 @@ export default function CoopPage() {
         user_id,
         role,
         joined_at,
-        users:user_id (email)
+        profiles:user_id (username, avatar_url)
       `)
       .eq("coop_id", id)
       .order("joined_at", { ascending: true });
@@ -210,7 +211,7 @@ export default function CoopPage() {
                   <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                       <Users size={16} />
-                      {coop.member_count} {coop.member_count === 1 ? "member" : "members"}
+                      {members.length} {members.length === 1 ? "member" : "members"}
                     </span>
                   </div>
                 </div>
@@ -311,7 +312,7 @@ export default function CoopPage() {
                     >
                       <div>
                         <p className="font-medium text-gray-900">
-                          {member.users?.email || "Unknown user"}
+                          {member.profiles?.username || "Unknown user"}
                         </p>
                         <p className="text-sm text-gray-500">
                           Joined {new Date(member.joined_at).toLocaleDateString()}
